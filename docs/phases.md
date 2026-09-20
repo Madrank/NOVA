@@ -25,13 +25,13 @@ Chaque phase produit un livrable fonctionnel. Une fonctionnalité n'avance sur l
 ## État d'avancement
 
 - [x] **Phase 0** — Cadrage validé
-- [x] **Phase 1** — Repository + architecture (en cours)
-- [ ] **Phase 2** — Design system
+- [x] **Phase 1** — Repository + architecture
+- [x] **Phase 2** — Design system v0 (tokens + composants de base) — en revue (PR `feature/design-system`)
+- [ ] **Phase 3** — Landing page
 
 ## Prochaine fonctionnalité
 
-À décider avec le web designer. Candidats naturels :
-1. **Design system initial** (tokens + premiers composants) — socle obligatoire
-2. **Landing page** — vitrine prioritaire selon le cahier des charges
+À décider avec le web designer, une fois le design system fusionné. Candidat naturel :
+1. **Landing page** — vitrine prioritaire selon le cahier des charges
 
 > Règle : ne jamais reprendre une fonctionnalité déjà terminée. Toujours partir de l'état réel du dépôt (voir README).
