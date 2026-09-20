@@ -49,3 +49,27 @@ Ce document enregistre les décisions structurantes. Il suit l'esprit des Archit
 **Décision.** Contrainte d'exclusion en base (plages horaires non chevauchantes) + vérification transactionnelle côté service.
 
 **Conséquences.** L'invariant « pas de chevauchement » est garanti même en cas d'accès concurrent.
+
+## ADR-007 — Typographies de marque Fraunces + Inter
+
+**Contexte.** Une identité éditoriale premium nécessite une paire typographique cohérente.
+
+**Décision.** Fraunces (serif variable, titres) et Inter (sans-serif, texte courant), chargées via Google Fonts avec `display=swap`. Définies comme tokens Tailwind `--font-serif` / `--font-sans`, remplaçables sans toucher aux composants.
+
+**Conséquences.** Identité typographique stable dès le design system ; le remplacement éventuel des polices est un changement de token unique.
+
+## ADR-008 — Tailwind CSS v4 (configuration CSS-first)
+
+**Contexte.** Besoin d'un design system fort, typé et mis à jour, sans configuration JS lourde.
+
+**Décision.** Tailwind v4 avec plugin Vite `@tailwindcss/vite`, tokens déclarés dans `src/index.css` via `@theme`. Pas de `tailwind.config.*`.
+
+**Conséquences.** Tokens co-localisés avec la feuille de style, build plus rapide, utilitaires auto-générés (`bg-ivory`, `text-gold`, `font-serif`…).
+
+## ADR-009 — Alias `@/*` vers `src/`
+
+**Contexte.** Lisibilité des imports dans une base qui grossit.
+
+**Décision.** Alias `@` mappé sur `src/` (Vite `resolve.alias` + `tsconfig` paths). Pas de `baseUrl` (déprécié en TypeScript 6).
+
+**Conséquences.** Imports absolus courts (`@/components/ui/Button`), refactors sereins.

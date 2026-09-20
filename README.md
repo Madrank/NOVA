@@ -53,9 +53,19 @@ PostgreSQL, modélisée progressivement : `users`, `professionals`, `establishme
 
 ## Installation
 
-> Documentation en cours de rédaction — l'installation complète sera fournie dès que les premières briques applicatives sont en place.
+### Frontend (Phase 2 — design system)
 
-Prérequis : Node.js ≥ 20, npm, PostgreSQL, compte Stripe.
+```
+cd frontend
+npm install
+npm run dev      # http://localhost:5173
+npm run lint     # oxlint
+npm run build    # tsc -b + build de production
+```
+
+Prérequis complets : Node.js ≥ 20, npm, PostgreSQL, compte Stripe.
+
+> La partie backend et la base de données seront détaillées quand leur phase sera ouverte.
 
 ## Développement
 
