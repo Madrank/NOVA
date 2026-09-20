@@ -26,8 +26,9 @@ Chaque phase produit un livrable fonctionnel. Une fonctionnalité n'avance sur l
 
 - [x] **Phase 0** — Cadrage validé
 - [x] **Phase 1** — Repository + architecture
-- [x] **Phase 2** — Design system v0 (tokens + composants de base) — en revue (PR `feature/design-system`)
-- [ ] **Phase 3** — Landing page
+- [x] **Phase 2** — Design system v0 (tokens + composants de base)
+- [x] **Phase 3** — Landing page éditoriale (en cours de revue — PR `feature/landing-page`)
+- [ ] **Phase 4** — Catalogue des expériences
 
 ## Prochaine fonctionnalité
 
