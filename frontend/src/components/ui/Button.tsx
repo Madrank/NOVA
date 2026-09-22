@@ -1,4 +1,5 @@
 import type { AnchorHTMLAttributes, ButtonHTMLAttributes } from 'react'
+import { Link } from 'react-router-dom'
 import { cn } from '@/lib/cn'
 
 type Variant = 'primary' | 'light' | 'outline' | 'ghost' | 'bordeaux'
@@ -28,16 +29,26 @@ interface ButtonBaseProps {
   className?: string
 }
 
-type ButtonProps = ButtonBaseProps &
-  ({ href: string } & Omit<AnchorHTMLAttributes<HTMLAnchorElement>, keyof ButtonBaseProps>) | ButtonBaseProps &
-  Omit<ButtonHTMLAttributes<HTMLButtonElement>, keyof ButtonBaseProps>
+type ButtonLinkProps = ButtonBaseProps &
+  Omit<AnchorHTMLAttributes<HTMLAnchorElement>, keyof ButtonBaseProps> & {
+    href?: string
+    to?: string
+  }
+
+type ButtonProps = ButtonLinkProps | (ButtonBaseProps & Omit<ButtonHTMLAttributes<HTMLButtonElement>, keyof ButtonBaseProps>)
 
 export function Button({ className, variant = 'primary', size = 'md', ...props }: ButtonProps) {
   const classes = cn(baseClasses, variantClasses[variant], sizeClasses[size], className)
+  const to = (props as Partial<ButtonLinkProps>).to
+  const href = (props as Partial<ButtonLinkProps>).href
 
-  if ('href' in props) {
-    return <a className={classes} {...props} />
+  if (to) {
+    return <Link className={classes} to={to} {...(props as AnchorHTMLAttributes<HTMLAnchorElement>)} />
   }
 
-  return <button className={classes} {...props} />
+  if (href) {
+    return <a className={classes} {...(props as AnchorHTMLAttributes<HTMLAnchorElement>)} />
+  }
+
+  return <button className={classes} {...(props as ButtonHTMLAttributes<HTMLButtonElement>)} />
 }

@@ -1,11 +1,13 @@
+import { Link } from 'react-router-dom'
+import { categories } from '@/data/services'
 import { Container } from '@/components/ui/Container'
 
 const explore = [
-  { label: 'Massage', href: '#categories' },
-  { label: 'Spa & sauna', href: '#categories' },
-  { label: 'Beauté', href: '#categories' },
-  { label: 'Yoga & méditation', href: '#categories' },
-  { label: 'Coffrets cadeaux', href: '#signature' },
+  ...categories.map((category) => ({
+    label: category.name,
+    to: `/experiences?categorie=${category.slug}`,
+  })),
+  { label: 'Coffrets cadeaux', to: '/experiences' },
 ]
 
 const company = [
@@ -79,12 +81,12 @@ export function Footer() {
             <ul className="mt-5 space-y-3">
               {explore.map((item) => (
                 <li key={item.label}>
-                  <a
-                    href={item.href}
+                  <Link
+                    to={item.to}
                     className="text-sm text-ivory/70 transition-colors duration-300 hover:text-gold-light"
                   >
                     {item.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>

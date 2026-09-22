@@ -1,4 +1,5 @@
 import { ArrowRight, MapPin } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/Button'
 import { Container } from '@/components/ui/Container'
 import { Reveal } from '@/components/ui/Reveal'
@@ -41,13 +42,13 @@ export function Professionals() {
                   <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
                   {pro.city}
                 </p>
-                <a
-                  href="#recherche"
+                <Link
+                  to="/experiences"
                   className="mt-auto inline-flex items-center gap-2 pt-6 text-[0.75rem] font-medium uppercase tracking-[0.2em] text-noir transition-colors duration-300 group-hover:text-gold"
                 >
                   Réserver avec {pro.name.split(' ')[0]}
                   <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-                </a>
+                </Link>
               </article>
             </Reveal>
           ))}
@@ -55,7 +56,7 @@ export function Professionals() {
 
         <Reveal delay={0.15}>
           <div className="mt-12 text-center">
-            <Button href="#recherche" variant="ghost" className="text-ink hover:text-gold">
+            <Button to="/experiences" variant="ghost" className="text-ink hover:text-gold">
               Tous les professionnels
             </Button>
           </div>
