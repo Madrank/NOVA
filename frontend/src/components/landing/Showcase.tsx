@@ -84,7 +84,7 @@ export function Showcase() {
 
             <Reveal delay={0.2}>
               <div className="mt-10">
-                <Button href="#recherche" variant="outline" size="lg">
+                <Button to="/experiences" variant="outline" size="lg">
                   Découvrir les expériences
                   <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </Button>

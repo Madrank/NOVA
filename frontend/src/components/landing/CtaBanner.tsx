@@ -18,10 +18,10 @@ export function CtaBanner() {
             expérience commence en quelques gestes.
           </p>
           <div className="mt-9 flex flex-wrap items-center justify-center gap-4">
-            <Button href="#recherche" variant="light" size="lg">
+            <Button to="/experiences" variant="light" size="lg">
               Réserver une expérience
             </Button>
-            <Button href="#signature" variant="ghost" size="lg" className="text-ivory hover:text-gold-light">
+            <Button to="/experiences" variant="ghost" size="lg" className="text-ivory hover:text-gold-light">
               Voir les coffrets cadeaux
             </Button>
           </div>

@@ -1,12 +1,19 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { Menu, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/cn'
 
-const navLinks = [
+interface NavLink {
+  label: string
+  href?: string
+  to?: string
+}
+
+const navLinks: NavLink[] = [
   { label: 'Découvrir', href: '#categories' },
-  { label: 'Expériences', href: '#signature' },
+  { label: 'Expériences', to: '/experiences' },
   { label: 'Professionnels', href: '#professionnels' },
   { label: 'À propos', href: '#concept' },
 ]
@@ -55,16 +62,28 @@ export function Header() {
 
         <ul className="hidden items-center gap-9 lg:flex">
           {navLinks.map((link) => (
-            <li key={link.href}>
-              <a
-                href={link.href}
-                className={cn(
-                  'text-[0.75rem] font-medium uppercase tracking-[0.22em] transition-colors duration-300',
-                  solid ? 'text-ink/80 hover:text-gold' : 'text-ivory/85 hover:text-gold-light',
-                )}
-              >
-                {link.label}
-              </a>
+            <li key={link.label}>
+              {link.to ? (
+                <Link
+                  to={link.to}
+                  className={cn(
+                    'text-[0.75rem] font-medium uppercase tracking-[0.22em] transition-colors duration-300',
+                    solid ? 'text-ink/80 hover:text-gold' : 'text-ivory/85 hover:text-gold-light',
+                  )}
+                >
+                  {link.label}
+                </Link>
+              ) : (
+                <a
+                  href={link.href}
+                  className={cn(
+                    'text-[0.75rem] font-medium uppercase tracking-[0.22em] transition-colors duration-300',
+                    solid ? 'text-ink/80 hover:text-gold' : 'text-ivory/85 hover:text-gold-light',
+                  )}
+                >
+                  {link.label}
+                </a>
+              )}
             </li>
           ))}
         </ul>
@@ -77,7 +96,7 @@ export function Header() {
           >
             Connexion
           </Button>
-          <Button href="#recherche" variant={solid ? 'primary' : 'light'}>
+          <Button to="/experiences" variant={solid ? 'primary' : 'light'}>
             Réserver
           </Button>
         </div>
@@ -108,18 +127,28 @@ export function Header() {
             <ul className="space-y-6">
               {navLinks.map((link, index) => (
                 <motion.li
-                  key={link.href}
+                  key={link.label}
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.08 * index + 0.1, duration: 0.45 }}
                 >
-                  <a
-                    href={link.href}
-                    onClick={() => setMenuOpen(false)}
-                    className="font-serif text-4xl text-ivory transition-colors hover:text-gold-light"
-                  >
-                    {link.label}
-                  </a>
+                  {link.to ? (
+                    <Link
+                      to={link.to}
+                      onClick={() => setMenuOpen(false)}
+                      className="font-serif text-4xl text-ivory transition-colors hover:text-gold-light"
+                    >
+                      {link.label}
+                    </Link>
+                  ) : (
+                    <a
+                      href={link.href}
+                      onClick={() => setMenuOpen(false)}
+                      className="font-serif text-4xl text-ivory transition-colors hover:text-gold-light"
+                    >
+                      {link.label}
+                    </a>
+                  )}
                 </motion.li>
               ))}
             </ul>
@@ -127,7 +156,7 @@ export function Header() {
               <Button href="#connection" variant="ghost" className="text-ivory hover:text-gold-light">
                 Connexion
               </Button>
-              <Button href="#recherche" variant="light" onClick={() => setMenuOpen(false)}>
+              <Button to="/experiences" variant="light" onClick={() => setMenuOpen(false)}>
                 Réserver une expérience
               </Button>
             </div>
