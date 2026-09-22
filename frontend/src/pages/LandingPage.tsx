@@ -8,7 +8,7 @@ import { Testimonials } from '@/components/landing/Testimonials'
 
 export function LandingPage() {
   return (
-    <main>
+    <main id="contenu">
       <Hero />
       <Experiences />
       <Showcase />
