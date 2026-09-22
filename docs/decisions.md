@@ -73,3 +73,27 @@ Ce document enregistre les décisions structurantes. Il suit l'esprit des Archit
 **Décision.** Alias `@` mappé sur `src/` (Vite `resolve.alias` + `tsconfig` paths). Pas de `baseUrl` (déprécié en TypeScript 6).
 
 **Conséquences.** Imports absolus courts (`@/components/ui/Button`), refactors sereins.
+
+## ADR-010 — react-router-dom, l'état de navigation vit dans l'URL
+
+**Contexte.** Parcours multi-écrans (landing, catalogue, fiches) avec filtres.
+
+**Décision.** `react-router-dom` en SPA. Les filtres de recherche sont sérialisés dans la query string (`categorie`, `ville`, `budget`, `duree`, `tri`) ; la page les lit comme seule source de vérité (`useSearchParams` + `useMemo`), jamais de state dupliqué.
+
+**Conséquences.** URLs partageables, bouton retour fonctionnel, zéro divergence entre l'UI et l'URL. `Button` s'enrichit d'une variante `to` (rend un `Link`).
+
+## ADR-011 — Couche de recherche : contrat typé asynchrone, mock d'abord
+
+**Contexte.** La recherche et les filtres doivent exister avant le backend et sans le bloquer.
+
+**Décision.** `services/discovery.ts` expose `searchServices(filters): Promise<SearchResult>` sur un jeu de données mock (`data/services.ts`), isolé des composants. Une latence simulée matérialise le tour réseau.
+
+**Conséquences.** Les composants ne changent pas lors du branchement de l'API REST : seul le corps de `searchServices` est remplacé. Les types (`frontend/src/types/service.ts`) reflètent le futur schéma.
+
+## ADR-012 — Animations au scroll via `motion` + respect de `prefers-reduced-motion`
+
+**Contexte.** Effets immersifs sans nuire à l'accessibilité.
+
+**Décision.** `Reveal` utilise `whileInView` (une seule fois), fondu + translation légère, et désactive la translation via `useReducedMotion` quand l'utilisateur le demande.
+
+**Conséquences.** Entrées séquencées élégantes ; aucun mouvement imposé aux utilisateurs sensibles.

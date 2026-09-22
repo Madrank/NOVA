@@ -55,6 +55,24 @@ Neutres noirs volontairement « chauds » : pas de gris pur, l'ensemble reste do
 | `CardTitle` | `components/ui/CardTitle.tsx` | Titre serif |
 | `CardDescription` | `components/ui/CardDescription.tsx` | Texte secondaire `ink/70` |
 | `Container` | `components/ui/Container.tsx` | `as` + `size` + `className` |
+| `Skeleton` | `components/ui/Skeleton.tsx` | Placeholder de chargement (`animate-pulse`) |
+| `SectionHeading` | `components/ui/SectionHeading.tsx` | Overline + titre serif + description |
+| `Reveal` | `components/ui/Reveal.tsx` | Apparition au scroll (Motion), respecte `prefers-reduced-motion` |
+| `SearchBar` | `components/search/SearchBar.tsx` | Ville / catégorie / date → navigue vers `/experiences` |
+
+## Composants catalogue (Phase 4)
+
+| Composant | Fichier | Notes |
+| --- | --- | --- |
+| `ServiceCard` | `components/catalog/ServiceCard.tsx` | Card prestation : image, badges, prix, durée, note |
+| `FiltersPanel` | `components/catalog/FiltersPanel.tsx` | Ville, budget, durée (sidebar desk / repli mobile) |
+| `CategoryChips` | `components/catalog/CategoryChips.tsx` | Filtre rapide par catégorie |
+
+## Routage et navigation
+
+- `react-router-dom` : `/` (landing), `/experiences` (catalogue), `/experiences/:slug` (fiche), `*` (404)
+- Les filtres du catalogue sont portés par l'URL (`?categorie&ville&budget&duree&tri`) : partageables, bouton retour fonctionnel
+- `Button` accepte `to` (rend un `Link`) ou `href` (rend un `<a>`)
 
 ## Interactivité et accessibilité
 
