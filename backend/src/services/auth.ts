@@ -10,6 +10,7 @@ export interface RegisterServiceInput {
   firstName: string;
   lastName: string;
   phone?: string;
+  role?: 'client' | 'professional';
 }
 
 export interface Session {
@@ -36,7 +37,7 @@ export async function register(input: RegisterServiceInput): Promise<Session> {
     firstName: input.firstName,
     lastName: input.lastName,
     phone: input.phone ?? null,
-    role: 'client',
+    role: input.role ?? 'client',
   });
 
   const token = signToken({ userId: user.id, role: user.role });
