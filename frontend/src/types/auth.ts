@@ -23,16 +23,10 @@ export interface RegisterInput {
   firstName: string
   lastName: string
   phone?: string
+  role?: 'client' | 'professional'
 }
 
 export interface LoginInput {
   email: string
   password: string
-}
-
-export interface ApiErrorBody {
-  error?: {
-    code?: string
-    message?: string
-  }
 }

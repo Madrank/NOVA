@@ -12,6 +12,7 @@ export interface AuthContextValue {
     email: string
     password: string
     phone?: string
+    role?: 'client' | 'professional'
   }) => Promise<void>
   logout: () => void
 }

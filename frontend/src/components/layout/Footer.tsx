@@ -10,9 +10,14 @@ const explore = [
   { label: 'Coffrets cadeaux', to: '/experiences' },
 ]
 
+const network = [
+  { label: 'Les professionnels', to: '/professionnels' },
+  { label: 'Nos établissements', to: '/etablissements' },
+  { label: 'Espace professionnel', to: '/profil-professionnel' },
+]
+
 const company = [
   { label: 'À propos', href: '#concept' },
-  { label: 'Professionnels', href: '#professionnels' },
   { label: 'Devenir partenaire', href: '#professionnels' },
   { label: 'Contact', href: '#connection' },
 ]
@@ -94,6 +99,21 @@ export function Footer() {
 
           <div className="lg:col-span-3">
             <p className="text-[0.6875rem] font-medium uppercase tracking-[0.28em] text-gold">
+              Le réseau
+            </p>
+            <ul className="mt-5 space-y-3">
+              {network.map((item) => (
+                <li key={item.label}>
+                  <Link
+                    to={item.to}
+                    className="text-sm text-ivory/70 transition-colors duration-300 hover:text-gold-light"
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-7 text-[0.6875rem] font-medium uppercase tracking-[0.28em] text-gold">
               NOVA
             </p>
             <ul className="mt-5 space-y-3">

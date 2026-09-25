@@ -1,4 +1,4 @@
-import { CalendarHeart, LogOut, Phone, UserRound } from 'lucide-react'
+import { Briefcase, CalendarHeart, LogOut, Phone, UserRound } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/auth/useAuth'
 import { Container } from '@/components/ui/Container'
@@ -12,6 +12,7 @@ export function AccountPage() {
   }
 
   const initials = `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
+  const isProfessional = user.role === 'professional'
 
   return (
     <main id="contenu" className="min-h-screen bg-ivory">
@@ -30,7 +31,9 @@ export function AccountPage() {
               {initials}
             </span>
             <div>
-              <p className="text-sm uppercase tracking-[0.18em] text-ink/60">Profil client</p>
+              <p className="text-sm uppercase tracking-[0.18em] text-ink/60">
+                {isProfessional ? 'Profil professionnel' : 'Profil client'}
+              </p>
               <p className="mt-1 font-serif text-2xl text-noir">
                 {user.firstName} {user.lastName}
               </p>
@@ -71,6 +74,24 @@ export function AccountPage() {
             Se déconnecter
           </Button>
         </div>
+
+        {isProfessional ? (
+          <div className="mt-14 border border-noir/10 rounded-card bg-noir p-8 text-ivory">
+            <p className="flex items-center gap-3 font-serif text-2xl">
+              <Briefcase className="h-6 w-6 text-gold-light" />
+              Votre espace professionnel
+            </p>
+            <p className="mt-3 max-w-md text-sm leading-relaxed text-ivory/70">
+              Gérez la fiche visible des clients : titre, bio, spécialités et lieu de pratique.
+            </p>
+            <Link
+              to="/profil-professionnel"
+              className="mt-6 inline-block text-sm uppercase tracking-[0.2em] text-gold-light hover:text-ivory"
+            >
+              Accéder à ma vitrine →
+            </Link>
+          </div>
+        ) : null}
 
         <div className="mt-14 border border-noir/10 rounded-card bg-noir p-8 text-ivory">
           <p className="flex items-center gap-3 font-serif text-2xl">
