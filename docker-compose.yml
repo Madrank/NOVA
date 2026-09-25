@@ -1,0 +1,23 @@
+name: nova
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: nova-db
+    environment:
+      POSTGRES_USER: nova
+      POSTGRES_PASSWORD: nova
+      POSTGRES_DB: nova_dev
+    ports:
+      - "5434:5432"
+    volumes:
+      - nova_pgdata:/var/lib/postgresql/data
+      - ./backend/db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nova -d nova_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  nova_pgdata:
