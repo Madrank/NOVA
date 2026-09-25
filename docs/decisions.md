@@ -121,3 +121,17 @@ Ce document enregistre les décisions structurantes. Il suit l'esprit des Archit
 **Décision.** `docker-compose.yml` à la racine : `postgres:16-alpine`, port hôte **5434** (évite les conflits 5432/5433), credentials dev `nova`/`nova`. Les schémas vivent dans `backend/db/init/*.sql` (montés dans `/docker-entrypoint-initdb.d`, exécutés à la création du volume). Pas d'ORM : `pg` + SQL explicite dans les repositories.
 
 **Conséquences.** Base reproductible (`npm run db:up`), évolution des tables au fil des phases ; libre choix de faire évoluer les migrations quand le besoin de versioning apparaîtra.
+
+## ADR-016 — Profils professionnels et établissements : l'API est la source de vérité du réseau
+
+**Contexte.** La Phase 6 met à disposition la liste des praticiens et des lieux. Le catalogue d'expériences reste provisoirement sur les données mock de la Phase 4 ; les pros et établissements basculent, eux, sur l'API réelle (choix utilisateur).
+
+**Décision.** Deux tables (`establishments`, `professionals`) avec slugs uniques indexés, références `user_id` (un compte == un profil pro) et `establishment_id` nullable (indépendants autorisés). Endpoints :
+- publics en lecture : `GET /api/establishments`, `GET /api/establishments/:slug` (avec les pros du lieu), `GET /api/professionals`, `GET /api/professionals/:slug` ;
+- professionnel authentifié : `GET/POST/PATCH /api/professionals/me` (garde `requireRole('professional')`, ordre de route `me` avant `/:slug`) ;
+- admin uniquement : `POST /api/establishments` ;
+- `register` accepte un rôle optionnel `client|professional` (le pro crée ensuite sa fiche via `/me`).
+
+Le schéma de réponse public embarque les champs à plat du pro (`firstName`, `lastName` issus de `users`) et un résumé imbriqué de l'établissement ; le DDD en échec répond via le format d'erreur normalisé. Côté frontend, le client HTTP factorisé (`services/api.ts` avec `token` optionnel) couvre auth et réseau.
+
+**Conséquences.** Le réseau est gouverné par l'API ; le frontend affiche sans dupliquer la logique. Les slugs servent d'URL humaines et partageables. Rien ne change pour les données du catalogue (toujours mock en Phase 4) ; leur branchement suivra le même schéma.
