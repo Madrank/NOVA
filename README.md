@@ -53,19 +53,34 @@ PostgreSQL, modélisée progressivement : `users`, `professionals`, `establishme
 
 ## Installation
 
-### Frontend (Phase 2 — design system)
+### Prise en main rapide
 
 ```
+# Base de données PostgreSQL (Docker)
+docker compose up -d db
+
+# Backend (port 4000)
+cd backend
+cp .env.example .env        # puis ajuster le secret JWT
+npm install
+npm run dev
+
+# Frontend (port 5173, proxy /api vers le backend)
 cd frontend
 npm install
-npm run dev      # http://localhost:5173
-npm run lint     # oxlint
-npm run build    # tsc -b + build de production
+npm run dev
 ```
 
-Prérequis complets : Node.js ≥ 20, npm, PostgreSQL, compte Stripe.
+### Scripts
 
-> La partie backend et la base de données seront détaillées quand leur phase sera ouverte.
+| Répertoire | Script | Rôle |
+| --- | --- | --- |
+| `frontend` | `npm run dev` / `lint` / `build` | Développement, oxlint, build de production |
+| `backend` | `npm run dev` / `build` / `start` | API Express (tsx watch, tsc, node dist) |
+| `backend` | `npm run db:up` / `db:down` / `db:logs` | Base Docker compose |
+| racine | `docker compose up -d db` | PostgreSQL 16 (port 5434) |
+
+Prérequis complets : Node.js ≥ 20, npm, Docker (PostgreSQL), compte Stripe.
 
 ## Développement
 

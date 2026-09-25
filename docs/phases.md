@@ -28,8 +28,9 @@ Chaque phase produit un livrable fonctionnel. Une fonctionnalité n'avance sur l
 - [x] **Phase 1** — Repository + architecture
 - [x] **Phase 2** — Design system v0 (tokens + composants de base)
 - [x] **Phase 3** — Landing page éditoriale
-- [x] **Phase 4** — Catalogue des expériences (découverte, recherche, filtres, fiches) — en revue (PR `feature/search`)
-- [ ] **Phase 5** — Authentification
+- [x] **Phase 4** — Catalogue des expériences (découverte, recherche, filtres, fiches)
+- [x] **Phase 5** — Authentification (client/pro/admin) + profil — en revue (PR `feature/authentication`)
+- [ ] **Phase 6** — Profils professionnels et établissements
 
 ## Prochaine fonctionnalité
 

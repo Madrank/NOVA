@@ -18,17 +18,21 @@ nova/
 │       ├── assets/         # Images, polices, icônes
 │       └── main.tsx
 ├── backend/
+│   ├── db/init/               # Scripts SQL exécutés à la création du volume PostgreSQL
+│   ├── .env.example           # Variables d'environnement (copier vers .env)
 │   └── src/
-│       ├── controllers/    # HTTP : valider l'entrée, appeler le service, répondre
-│       ├── routes/         # Déclaration des routes Express
-│       ├── services/       # Logique métier
-│       ├── repositories/   # Accès aux données (PostgreSQL)
-│       ├── middlewares/    # Auth, erreurs, etc.
-│       ├── validators/     # Validation des entrées
-│       ├── lib/            # JWT, emails, Stripe (clients externes)
-│       ├── config/         # Configuration / variables d'environnement
-│       ├── types/          # Types partagés backend
-│       └── server.ts       # Point d'entrée
+│       ├── controllers/       # HTTP : valider l'entrée, appeler le service, répondre
+│       ├── routes/            # Déclaration des routes Express
+│       ├── services/          # Logique métier
+│       ├── repositories/      # Accès aux données (PostgreSQL)
+│       ├── middlewares/       # Auth, rôles, validation, erreurs
+│       ├── validators/        # Schémas zod des entrées
+│       ├── lib/               # JWT, erreurs applicatives
+│       ├── config/            # Configuration / variables d'environnement
+│       ├── types/             # Types partagés backend
+│       ├── app.ts             # Assemblage Express
+│       └── server.ts          # Point d'entrée
+├── docker-compose.yml         # PostgreSQL 16 (port hôte 5434)
 ├── docs/
 │   ├── architecture.md
 │   ├── design-system.md
