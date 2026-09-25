@@ -29,12 +29,10 @@ Chaque phase produit un livrable fonctionnel. Une fonctionnalité n'avance sur l
 - [x] **Phase 2** — Design system v0 (tokens + composants de base)
 - [x] **Phase 3** — Landing page éditoriale
 - [x] **Phase 4** — Catalogue des expériences (découverte, recherche, filtres, fiches)
-- [x] **Phase 5** — Authentification (client/pro/admin) + profil — en revue (PR `feature/authentication`)
-- [ ] **Phase 6** — Profils professionnels et établissements
+- [x] **Phase 5** — Authentification (client/pro/admin) + profil — fusionnée (PR #6)
+- [ ] **Phase 6** — Profils professionnels et établissements — en revue (branche `feature/professional-profiles`)
+- [ ] **Phase 7** — Système de réservation (disponibilités, conflits, statuts) — prochaine
 
-## Prochaine fonctionnalité
+## Règle de progression
 
-À décider avec le web designer, une fois le design system fusionné. Candidat naturel :
-1. **Landing page** — vitrine prioritaire selon le cahier des charges
-
-> Règle : ne jamais reprendre une fonctionnalité déjà terminée. Toujours partir de l'état réel du dépôt (voir README).
+Ne jamais reprendre une fonctionnalité déjà terminée : toujours partir de l'état réel du dépôt (voir README). Une branche `feature/*` n'est fusionnée dans `develop` qu'après revue (PR).

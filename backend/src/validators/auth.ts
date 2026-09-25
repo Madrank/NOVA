@@ -21,6 +21,7 @@ export const registerSchema = z.object({
     .max(20, 'Numéro de téléphone invalide')
     .optional()
     .or(z.literal('').transform(() => undefined)),
+  role: z.enum(['client', 'professional']).optional().default('client'),
 });
 
 export const loginSchema = z.object({

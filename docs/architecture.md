@@ -8,28 +8,27 @@ Monorepo simple à deux packages indépendants (frontend / backend), versionnés
 nova/
 ├── frontend/
 │   └── src/
-│       ├── components/     # Composants UI réutilisables (design system)
+│       ├── auth/           # Contexte d'authentification, gardes (RequireAuth/RequireRole)
+│       ├── components/     # Composants UI réutilisables (design system, cartes réseau)
 │       ├── pages/          # Écrans / routes
-│       ├── layouts/        # Layouts (public, dashboard, back-office)
-│       ├── hooks/          # Logique réutilisable côté React
-│       ├── services/       # Appels API
+│       ├── services/       # Appels API (client HTTP factorisé dans api.ts)
 │       ├── lib/            # Utilitaires (dates, format, etc.)
-│       ├── types/          # Types TypeScript partagés
-│       ├── assets/         # Images, polices, icônes
+│       ├── types/          # Types TypeScript par domaine (auth, service, professional, establishment)
+│       ├── data/           # Données mock (catalogue Phase 4, en attente d'API)
 │       └── main.tsx
 ├── backend/
-│   ├── db/init/               # Scripts SQL exécutés à la création du volume PostgreSQL
+│   ├── db/init/               # 001_auth.sql, 002_professionals_establishments.sql (création du volume)
 │   ├── .env.example           # Variables d'environnement (copier vers .env)
 │   └── src/
 │       ├── controllers/       # HTTP : valider l'entrée, appeler le service, répondre
-│       ├── routes/            # Déclaration des routes Express
+│       ├── routes/            # auth, establishments, professionals (ordre /me avant /:slug)
 │       ├── services/          # Logique métier
 │       ├── repositories/      # Accès aux données (PostgreSQL)
 │       ├── middlewares/       # Auth, rôles, validation, erreurs
 │       ├── validators/        # Schémas zod des entrées
-│       ├── lib/               # JWT, erreurs applicatives
+│       ├── lib/               # JWT, erreurs applicatives, slugify
 │       ├── config/            # Configuration / variables d'environnement
-│       ├── types/             # Types partagés backend
+│       ├── types/             # Types partagés backend (auth, establishment, professional)
 │       ├── app.ts             # Assemblage Express
 │       └── server.ts          # Point d'entrée
 ├── docker-compose.yml         # PostgreSQL 16 (port hôte 5434)
@@ -40,6 +39,23 @@ nova/
 │   └── decisions.md
 └── README.md
 ```
+
+## API REST
+
+| Méthode | Endpoint | Accès | Description |
+| --- | --- | --- | --- |
+| `GET` | `/health` | public | État du service |
+| `POST` | `/api/auth/register` | public | Création de compte (rôle `client` ou `professional` optionnel) |
+| `POST` | `/api/auth/login` | public | Connexion, retour `{ user, token }` |
+| `GET` | `/api/auth/me` | authentifié | Profil connecté |
+| `GET` | `/api/establishments` | public | Liste des établissements actifs |
+| `GET` | `/api/establishments/:slug` | public | Détail + professionnels du lieu |
+| `POST` | `/api/establishments` | admin | Création d'un établissement |
+| `GET` | `/api/professionals` | public | Liste des professionnels actifs |
+| `GET` | `/api/professionals/me` | pro | Fiche du professionnel connecté (null si absente) |
+| `POST` | `/api/professionals/me` | pro | Création de la fiche du professionnel |
+| `PATCH` | `/api/professionals/me` | pro | Mise à jour de la fiche (rattachement d'établissement inclus) |
+| `GET` | `/api/professionals/:slug` | public | Fiche publique d'un professionnel |
 
 ## Principes directeurs
 
@@ -53,9 +69,9 @@ nova/
 
 Créé progressivement, au rythme des fonctionnalités :
 
-- `users` — comptes et rôles
-- `professionals` — profils professionnels
-- `establishments` — établissements
+- `users` — comptes et rôles (`client`, `professional`, `admin`)
+- `professionals` — profils professionnels (slugs uniques, `user_id` → 1:1, `establishment_id` nullable)
+- `establishments` — établissements (slugs uniques, adresse à plat, actifs/inactifs)
 - `categories` — catégories d'expériences
 - `services` — prestations
 - `availability` — créneaux de disponibilité
