@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { Menu, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useAuth } from '@/auth/useAuth'
 import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/cn'
 
@@ -17,6 +18,80 @@ const navLinks: NavLink[] = [
   { label: 'Professionnels', href: '#professionnels' },
   { label: 'À propos', href: '#concept' },
 ]
+
+function SessionActions({
+  solid,
+  compact,
+  onNavigate,
+}: {
+  solid: boolean
+  compact?: boolean
+  onNavigate?: () => void
+}) {
+  const { status, user, logout } = useAuth()
+
+  if (status === 'authenticated' && user) {
+    const initials = `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
+    return (
+      <div className={cn('flex items-center gap-3', compact && 'flex-col items-stretch gap-3')}>
+        <Link
+          to="/compte"
+          onClick={onNavigate}
+          className={cn(
+            'inline-flex items-center gap-2 rounded-btn px-2 py-1.5 text-[0.75rem] font-medium uppercase tracking-[0.18em] transition-colors duration-300',
+            solid ? 'text-ink/80 hover:text-gold' : 'text-ivory/85 hover:text-gold-light',
+          )}
+        >
+          <span
+            aria-hidden
+            className={cn(
+              'flex h-8 w-8 items-center justify-center rounded-full font-serif text-sm',
+              solid ? 'bg-noir text-ivory' : 'bg-ivory text-noir',
+            )}
+          >
+            {initials}
+          </span>
+          Mon compte
+        </Link>
+        <Button
+          onClick={() => {
+            logout()
+            onNavigate?.()
+          }}
+          variant={solid ? 'ghost' : 'ghost'}
+          className={cn(!solid && 'text-ivory hover:text-gold-light')}
+        >
+          Déconnexion
+        </Button>
+      </div>
+    )
+  }
+
+  return (
+    <div className={cn('flex items-center gap-4', compact && 'flex-col items-stretch gap-3')}>
+      <Button
+        to="/connexion"
+        onClick={onNavigate}
+        variant={solid ? 'ghost' : 'ghost'}
+        className={cn(!solid && 'text-ivory hover:text-gold-light')}
+      >
+        Connexion
+      </Button>
+      {compact ? null : (
+        <Button
+          to="/inscription"
+          onClick={onNavigate}
+          variant="outline"
+          className={cn(
+            !solid && 'border-ivory/40 text-ivory hover:border-ivory hover:bg-ivory hover:text-noir',
+          )}
+        >
+          S'inscrire
+        </Button>
+      )}
+    </div>
+  )
+}
 
 export function Header() {
   const [scrolled, setScrolled] = useState(false)
@@ -89,13 +164,7 @@ export function Header() {
         </ul>
 
         <div className="hidden items-center gap-4 lg:flex">
-          <Button
-            href="#connection"
-            variant={solid ? 'ghost' : 'ghost'}
-            className={cn(!solid && 'text-ivory hover:text-gold-light')}
-          >
-            Connexion
-          </Button>
+          <SessionActions solid={solid} />
           <Button to="/experiences" variant={solid ? 'primary' : 'light'}>
             Réserver
           </Button>
@@ -153,9 +222,7 @@ export function Header() {
               ))}
             </ul>
             <div className="mt-auto flex flex-col gap-3">
-              <Button href="#connection" variant="ghost" className="text-ivory hover:text-gold-light">
-                Connexion
-              </Button>
+              <SessionActions solid={false} compact onNavigate={() => setMenuOpen(false)} />
               <Button to="/experiences" variant="light" onClick={() => setMenuOpen(false)}>
                 Réserver une expérience
               </Button>

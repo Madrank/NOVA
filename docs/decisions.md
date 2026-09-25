@@ -97,3 +97,27 @@ Ce document enregistre les décisions structurantes. Il suit l'esprit des Archit
 **Décision.** `Reveal` utilise `whileInView` (une seule fois), fondu + translation légère, et désactive la translation via `useReducedMotion` quand l'utilisateur le demande.
 
 **Conséquences.** Entrées séquencées élégantes ; aucun mouvement imposé aux utilisateurs sensibles.
+
+## ADR-013 — Backend Express : pipeline validation · service · repository
+
+**Contexte.** La Phase 5 introduit l'API REST ; la base grandit avec le booking, le paiement, etc.
+
+**Décision.** Récipient : `routes` → `validators` (zod, injoignable : le corps est remplacé après `safeParse`) → `controllers` (HTTP pur) → `services` (logique métier) → `repositories` (SQL). Erreurs applicatives via `AppError(status, code, message, details)` centralisées dans un handler unique ; réponse d'erreur normalisée `{ error: { code, message, details? } }`.
+
+**Conséquences.** La logique métier est testable sans HTTP ; l'API reste cohérente quand les routes s'ajoutent.
+
+## ADR-014 — Auth : JWT HS256 + argon2id + rôles dans le token
+
+**Contexte.** Trois profils (client, professional, admin), sessions sans état côté serveur.
+
+**Décision.** `jsonwebtoken` (HS256, secret 64 octets en prod, expiration 7 j) portant `{ userId, role }`. Mots de passe hashés argon2id (mémoire 19 456 Ko, 2 itérations). Moyens : `requireAuth` (lit le Bearer), `requireRole(...roles)` composable. Les cookies sont écartés au profit du header `Authorization` (SPA + API distinctes).
+
+**Conséquences.** Middlewares réutilisables par périmètre ; aucun secret ni password en clair ; rejet explicite `INVALID_CREDENTIALS` pour login en échec (pas de fuite d'existence de compte sur login).
+
+## ADR-015 — PostgreSQL via Docker Compose + init SQL au premier démarrage
+
+**Contexte.** Base requise dès la Phase 5, plusieurs machines de dev possibles.
+
+**Décision.** `docker-compose.yml` à la racine : `postgres:16-alpine`, port hôte **5434** (évite les conflits 5432/5433), credentials dev `nova`/`nova`. Les schémas vivent dans `backend/db/init/*.sql` (montés dans `/docker-entrypoint-initdb.d`, exécutés à la création du volume). Pas d'ORM : `pg` + SQL explicite dans les repositories.
+
+**Conséquences.** Base reproductible (`npm run db:up`), évolution des tables au fil des phases ; libre choix de faire évoluer les migrations quand le besoin de versioning apparaîtra.
