@@ -135,3 +135,17 @@ Ce document enregistre les décisions structurantes. Il suit l'esprit des Archit
 Le schéma de réponse public embarque les champs à plat du pro (`firstName`, `lastName` issus de `users`) et un résumé imbriqué de l'établissement ; le DDD en échec répond via le format d'erreur normalisé. Côté frontend, le client HTTP factorisé (`services/api.ts` avec `token` optionnel) couvre auth et réseau.
 
 **Conséquences.** Le réseau est gouverné par l'API ; le frontend affiche sans dupliquer la logique. Les slugs servent d'URL humaines et partageables. Rien ne change pour les données du catalogue (toujours mock en Phase 4) ; leur branchement suivra le même schéma.
+
+## ADR-017 — Booking temps réel : créneaux concrets, contrainte d'exclusion, statut direct
+
+**Contexte.** La Phase 7 introduit le catalogue paginé côté API, la réservation et sa gestion. Deux choix utilisateur la cadrent : des **créneaux concrets générés** (une grille de slots par prestation sur les ~15 prochains jours) plutôt qu'une saisie libre, et un **statut « confirmée » directement** à la création (pas d'étape de validation côté pro).
+
+**Décision.**
+- Tables : `services` (price en `price_cents`, `duration_min`, `duo`, `giftable`, `rating numeric(2,1)` + `reviews_count`, `image_from/to` sur gradient, `professional_id` + `establishment_id`), `availability` (UNIQUE `(service_id, starts_at)`, `is_booked` pour le dé-booking des slots), `bookings` (statut `confirmed|cancelled|completed`, prix snapshoté à la réservation, `client_id`, `professional_id` dénormalisé, `availability_id`).
+- **Anti-double-réservation** : `CREATE EXTENSION btree_gist` + contrainte d'exclusion `bookings_no_overlap` sur `tstzrange(starts_at, ends_at, '[)')` filtrée `WHERE status = 'confirmed'`. Un professionnel ne peut donc jamais être occupé par deux réservations chevauchantes, même sur deux prestations différentes — garantie par PostgreSQL.
+- Création transactionnelle (`BEGIN` … `COMMIT`/`ROLLBACK`) : sélection du slot `FOR UPDATE`, INSERT avec `RETURNING id`, marquage `availability.is_booked = true` (+ repassé à false à l'annulation). Les SQLSTATE `23P01`/`23505` sont mappés en `409 BOOKING_CONFLICT`.
+- Règles de l'annulation : propriétaire (client), admin, ou pro de la réservation uniquement ; refus si la séance est passée. Échecs d'accès `404`/`403` selon le pipeline d'erreurs normalisé.
+- API : `GET /api/services`, `GET /api/services/:slug` (avec sous-objets establishment/professional), `GET /api/services/:slug/availability`, et côté authentifié `POST /api/bookings`, `GET /api/bookings/me`, `POST /api/bookings/:id/cancel`. Ordre de route `/:slug/availability` avant `/:slug`.
+- Frontend : la fiche service interroge l'API d'abord, **retombe sur les mocks Phase 4** si le service n'existe pas encore en base (mode vitrine sans réservation) ; créneaux groupés par jour (max 7), sélection d'heure, confirmation → écran de succès ; « Mes réservations » dans le compte (à venir + historique, annulation dédiée) ; prix convertis `price_cents → €`.
+
+**Conséquences.** L'invariant « pas de chevauchement » est garanti en base, pas seulement en application ; les conflits concurrents sont détectés au niveau PostgreSQL. Le seed (`db:seed-booking`) reste idempotent et fournit 6 pros démo, 12 prestations alignées sur les slugs mock et ~900 créneaux sur 15 jours. Le catalogue bascule réellement sur l'API : les fiches affichent les données serveur (prix, durée, lieu, praticien réels) dès qu'elles existent en base.

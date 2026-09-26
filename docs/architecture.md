@@ -56,6 +56,12 @@ nova/
 | `POST` | `/api/professionals/me` | pro | Création de la fiche du professionnel |
 | `PATCH` | `/api/professionals/me` | pro | Mise à jour de la fiche (rattachement d'établissement inclus) |
 | `GET` | `/api/professionals/:slug` | public | Fiche publique d'un professionnel |
+| `GET` | `/api/services` | public | Catalogue des prestations (12 seedées) |
+| `GET` | `/api/services/:slug` | public | Fiche d'une prestation (établissement + pro inclus) |
+| `GET` | `/api/services/:slug/availability` | public | Créneaux libres (15 prochains jours) |
+| `POST` | `/api/bookings` | client | Création d'une réservation (slots `confirmed` sans overlap) |
+| `GET` | `/api/bookings/me` | client | Réservations du client connecté |
+| `POST` | `/api/bookings/:id/cancel` | client/pro/admin | Annulation (raison optionnelle, slot libéré) |
 
 ## Principes directeurs
 
