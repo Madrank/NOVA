@@ -48,3 +48,32 @@ export interface SearchResult {
   items: Service[]
   total: number
 }
+
+export interface PublicService {
+  id: string
+  slug: string
+  name: string
+  category: string
+  summary: string
+  description: string
+  price: number
+  durationMinutes: number
+  duo: boolean
+  giftable: boolean
+  rating: number
+  reviewsCount: number
+  imageFrom: string | null
+  imageTo: string | null
+  establishment: {
+    id: string
+    slug: string
+    name: string
+    city: string
+  } | null
+  professional: {
+    id: string
+    slug: string
+    firstName: string
+    lastName: string
+  } | null
+}
