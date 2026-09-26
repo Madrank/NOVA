@@ -14,7 +14,8 @@
     "lint": "oxlint src",
     "db:up": "docker compose -f ../docker-compose.yml up -d db",
     "db:down": "docker compose -f ../docker-compose.yml down",
-    "db:logs": "docker compose -f ../docker-compose.yml logs -f db"
+    "db:logs": "docker compose -f ../docker-compose.yml logs -f db",
+    "db:seed-booking": "tsx src/db/seed-booking.ts"
   },
   "dependencies": {
     "argon2": "^0.45.1",
