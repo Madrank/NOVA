@@ -149,3 +149,19 @@ Le schéma de réponse public embarque les champs à plat du pro (`firstName`, `
 - Frontend : la fiche service interroge l'API d'abord, **retombe sur les mocks Phase 4** si le service n'existe pas encore en base (mode vitrine sans réservation) ; créneaux groupés par jour (max 7), sélection d'heure, confirmation → écran de succès ; « Mes réservations » dans le compte (à venir + historique, annulation dédiée) ; prix convertis `price_cents → €`.
 
 **Conséquences.** L'invariant « pas de chevauchement » est garanti en base, pas seulement en application ; les conflits concurrents sont détectés au niveau PostgreSQL. Le seed (`db:seed-booking`) reste idempotent et fournit 6 pros démo, 12 prestations alignées sur les slugs mock et ~900 créneaux sur 15 jours. Le catalogue bascule réellement sur l'API : les fiches affichent les données serveur (prix, durée, lieu, praticien réels) dès qu'elles existent en base.
+
+## ADR-018 — Gestion des disponibilités : jours + plages horaires, édition de la grille par le pro
+
+**Contexte.** La Phase 8 donne au professionnel la maîtrise de ses créneaux (la Phase 7 ne fournissait qu'un seed). Trois choix utilisateur cadrent la phase : une **saisie par jours + plages horaires** (chaque combinaison génère des créneaux concrets, cohérents avec la Phase 7), une **page dédiée** dans l'espace professionnel, et un **refus de suppression d'un créneau déjà réservé** (pas d'annulation en cascade).
+
+**Décision.**
+- Endpoints (tous `requireAuth` + `requireRole('professional')`) :
+  - `GET /api/professionals/me/availability` — créneaux à venir des prestations du pro (avec informations de prestation) ;
+  - `POST /api/professionals/me/availability` — génération : `{ serviceIds?, days[], ranges[{from, to}] }`. Pour chaque prestation du pro (ou le sous-ensemble fourni, vérifié comme lui appartenant), chaque jour (futur, borné à 60 jours) et chaque plage, les créneaux sont découpés **au pas de la durée de la prestation** (`duration_min`) ;
+  - `DELETE /api/professionals/me/availability/:slotId` — suppression réservée aux créneaux libres ;
+  - `GET /api/professionals/me/appointments` — réservations confirmées à venir avec le nom du client.
+- Idempotence et limites : insert multi-lignes via `UNNEST` + `ON CONFLICT (service_id, starts_at) DO NOTHING` (rejouer la même grille ne crée rien) ; plafond de 600 créneaux par appel ; plages de 1 à 5, rejet des plages inversées (422) et des jours passés (400, code `INVALID_DAY`).
+- Anti-réservation : suppression sur créneau réservé → `409 SLOT_BOOKED` (l'information provient du flag `availability.is_booked`, maintenu par le flux de réservation Phase 7).
+- Frontend : nouvelle page `/disponibilites` (garde `RequireRole('professional')`) — sélecteur de prestation (issue de `/api/services` filtrées par `professional.id`), jours proposés (7 prochains), plages horaires éditables (jusqu'à 3), liste des créneaux ouverts groupée par jour avec badge Réservé/Libre et suppression, et la section « Mes rendez-vous » (client, prestation, date, prix).
+
+**Conséquences.** Le pro gouverne sa grille sans toucher au code : la contrainte d'exclusion PostgreSQL continue de garantir l'invariant « pas de chevauchement », et le client profite d'une offre qui s'étoffe sans redéploiement. Le retrait d'un créneau réservé reste impossible tant que la réservation existe (cohérence côté client garanti).

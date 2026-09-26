@@ -62,6 +62,10 @@ nova/
 | `POST` | `/api/bookings` | client | Création d'une réservation (slots `confirmed` sans overlap) |
 | `GET` | `/api/bookings/me` | client | Réservations du client connecté |
 | `POST` | `/api/bookings/:id/cancel` | client/pro/admin | Annulation (raison optionnelle, slot libéré) |
+| `GET` | `/api/professionals/me/availability` | pro | Créneaux à venir du pro (prestations incluses) |
+| `POST` | `/api/professionals/me/availability` | pro | Génération de créneaux (jours + plages, pas = durée de prestation) |
+| `DELETE` | `/api/professionals/me/availability/:slotId` | pro | Suppression d'un créneau libre (refus 409 si réservé) |
+| `GET` | `/api/professionals/me/appointments` | pro | Réservations confirmées à venir (client inclus) |
 
 ## Principes directeurs
 
