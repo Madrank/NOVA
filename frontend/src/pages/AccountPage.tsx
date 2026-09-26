@@ -146,14 +146,22 @@ export function AccountPage() {
               Votre espace professionnel
             </p>
             <p className="mt-3 max-w-md text-sm leading-relaxed text-ivory/70">
-              Gérez la fiche visible des clients : titre, bio, spécialités et lieu de pratique.
+              Gérez la fiche visible des clients et ouvrez vos créneaux de réservation.
             </p>
-            <Link
-              to="/profil-professionnel"
-              className="mt-6 inline-block text-sm uppercase tracking-[0.2em] text-gold-light hover:text-ivory"
-            >
-              Accéder à ma vitrine →
-            </Link>
+            <div className="mt-6 flex flex-wrap gap-6">
+              <Link
+                to="/profil-professionnel"
+                className="inline-block text-sm uppercase tracking-[0.2em] text-gold-light hover:text-ivory"
+              >
+                Ma vitrine →
+              </Link>
+              <Link
+                to="/disponibilites"
+                className="inline-block text-sm uppercase tracking-[0.2em] text-gold-light hover:text-ivory"
+              >
+                Mes disponibilités →
+              </Link>
+            </div>
           </div>
         ) : null}
 

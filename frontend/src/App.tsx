@@ -5,6 +5,7 @@ import { RequireAuth, RequireRole } from '@/auth/guards'
 import { Footer } from '@/components/layout/Footer'
 import { Header } from '@/components/layout/Header'
 import { AccountPage } from '@/pages/AccountPage'
+import { AvailabilityPage } from '@/pages/AvailabilityPage'
 import { CatalogPage } from '@/pages/CatalogPage'
 import { EstablishmentDetailPage } from '@/pages/EstablishmentDetailPage'
 import { EstablishmentsPage } from '@/pages/EstablishmentsPage'
@@ -66,6 +67,14 @@ function App() {
             element={
               <RequireRole roles={['professional']}>
                 <ProfessionalProfilePage />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="/disponibilites"
+            element={
+              <RequireRole roles={['professional']}>
+                <AvailabilityPage />
               </RequireRole>
             }
           />
