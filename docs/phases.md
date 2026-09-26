@@ -31,7 +31,8 @@ Chaque phase produit un livrable fonctionnel. Une fonctionnalité n'avance sur l
 - [x] **Phase 4** — Catalogue des expériences (découverte, recherche, filtres, fiches)
 - [x] **Phase 5** — Authentification (client/pro/admin) + profil — fusionnée (PR #6)
 - [x] **Phase 6** — Profils professionnels et établissements — fusionnée (PR #7)
-- [ ] **Phase 7** — Système de réservation (disponibilités, conflits, statuts) — en revue (branche `feature/booking`)
+- [x] **Phase 7** — Système de réservation (disponibilités, conflits, statuts) — fusionnée (PR #8)
+- [ ] **Phase 8** — Calendrier et gestion des disponibilités — en revue (branche `feature/availability`)
 
 ## Règle de progression
 

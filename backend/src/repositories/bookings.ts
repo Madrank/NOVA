@@ -1,6 +1,13 @@
 import { pool } from '../db/pool.js';
-import type { BookingNames, BookingRow, BookingStatus, PublicBooking } from '../types/booking.js';
-import { toPublicBooking } from '../types/booking.js';
+import type {
+  BookingNames,
+  BookingRow,
+  BookingStatus,
+  ProfessionalNames,
+  PublicBooking,
+  PublicProfessionalBooking,
+} from '../types/booking.js';
+import { toProfessionalBooking, toPublicBooking } from '../types/booking.js';
 
 const SELECT_BOOKING = `
   b.id, b.client_id, b.professional_id, b.service_id, b.availability_id,
@@ -17,7 +24,15 @@ const FROM_JOIN = `
   JOIN professionals p ON p.id = b.professional_id
   JOIN users u ON u.id = p.user_id`;
 
+const SELECT_PROFESSIONAL_BOOKING = `
+  ${SELECT_BOOKING},
+  uc.first_name AS client_first_name, uc.last_name AS client_last_name`;
+
+const FROM_PROFESSIONAL_JOIN = `
+  ${FROM_JOIN.replace('JOIN users u ON u.id = p.user_id', 'JOIN users u ON u.id = p.user_id\n  JOIN users uc ON uc.id = b.client_id')}`;
+
 type BookingJoinedRow = BookingRow & BookingNames;
+type ProfessionalBookingRow = BookingRow & BookingNames & ProfessionalNames;
 
 export interface NewBooking {
   clientId: string;
@@ -65,6 +80,18 @@ export async function listBookingsForClient(clientId: string): Promise<PublicBoo
     [clientId],
   );
   return result.rows.map(toPublicBooking);
+}
+
+export async function listProfessionalAppointments(professionalId: string): Promise<PublicProfessionalBooking[]> {
+  const result = await pool.query<ProfessionalBookingRow>(
+    `SELECT ${SELECT_PROFESSIONAL_BOOKING}
+     ${FROM_PROFESSIONAL_JOIN}
+     WHERE b.professional_id = $1 AND b.status = 'confirmed' AND b.starts_at >= now()
+     ORDER BY b.starts_at
+     LIMIT 100`,
+    [professionalId],
+  );
+  return result.rows.map(toProfessionalBooking);
 }
 
 export async function findBookingRow(id: string): Promise<BookingRow | null> {

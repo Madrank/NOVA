@@ -41,3 +41,13 @@ export async function findServiceRowForBooking(slug: string): Promise<ServiceRow
   );
   return result.rows[0] ?? null;
 }
+
+export async function listServicesForProfessional(professionalId: string): Promise<
+  Array<{ id: string; slug: string; name: string; duration_min: number }>
+> {
+  const result = await pool.query<{ id: string; slug: string; name: string; duration_min: number }>(
+    `SELECT id, slug, name, duration_min FROM services WHERE professional_id = $1 AND is_active = true ORDER BY name`,
+    [professionalId],
+  );
+  return result.rows;
+}
