@@ -93,6 +93,22 @@ export function toPublicBooking(row: BookingRow & BookingNames): PublicBooking {
   };
 }
 
+export interface ProfessionalNames {
+  client_first_name: string;
+  client_last_name: string;
+}
+
+export interface PublicProfessionalBooking extends PublicBooking {
+  client: { firstName: string; lastName: string };
+}
+
+export function toProfessionalBooking(row: BookingRow & BookingNames & ProfessionalNames): PublicProfessionalBooking {
+  return {
+    ...toPublicBooking(row),
+    client: { firstName: row.client_first_name, lastName: row.client_last_name },
+  };
+}
+
 export interface BookingNames {
   service_slug: string;
   service_name: string;
