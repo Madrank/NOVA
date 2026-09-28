@@ -77,7 +77,7 @@ export function EstablishmentDetailPage() {
           <div className="lg:col-span-7">
             <Reveal>
               <img
-                src={placeholder({
+                src={establishment.image ?? placeholder({
                   from: '#24201c',
                   to: '#b98a3e',
                   label: establishment.name,

@@ -1,17 +1,11 @@
 import { Button } from '@/components/ui/Button'
 import { SearchBar } from '@/components/search/SearchBar'
-import { placeholder, visual } from '@/lib/placeholder'
 
 export function Hero() {
   return (
     <section id="top" className="relative flex min-h-svh flex-col justify-end overflow-hidden bg-noir">
       <img
-        src={placeholder({
-          ...visual.hero,
-          labelColor: '#d4af6a',
-          accent: '#b98a3e',
-          noteColor: '#b98a3e',
-        })}
+        src="/images/hero.jpg"
         alt=""
         aria-hidden="true"
         className="absolute inset-0 h-full w-full object-cover"
@@ -38,10 +32,10 @@ export function Hero() {
             meilleurs professionnels, près de chez vous.
           </p>
           <div className="mt-9 flex flex-wrap items-center gap-4">
-            <Button href="#categories" variant="light" size="lg">
+            <Button hash="categories" variant="light" size="lg">
               Découvrir les expériences
             </Button>
-            <Button href="#professionnels" variant="ghost" size="lg" className="text-ivory hover:text-gold-light">
+            <Button hash="professionnels" variant="ghost" size="lg" className="text-ivory hover:text-gold-light">
               Nos professionnels
             </Button>
           </div>

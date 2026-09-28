@@ -17,6 +17,18 @@ export const env = {
   jwtSecret: required('JWT_SECRET', process.env.JWT_SECRET),
   jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? '7d',
   corsOrigin: process.env.CORS_ORIGIN ?? 'http://localhost:5173',
+  stripeSecretKey: process.env.STRIPE_SECRET_KEY ?? '',
+  stripePublishableKey: process.env.STRIPE_PUBLISHABLE_KEY ?? '',
+  stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET ?? '',
+  appUrl: process.env.APP_URL ?? 'http://localhost:5173',
+  mailDriver: process.env.MAIL_DRIVER ?? 'log',
+  smtp: {
+    host: process.env.SMTP_HOST ?? '',
+    port: Number(process.env.SMTP_PORT ?? 587),
+    user: process.env.SMTP_USER ?? '',
+    pass: process.env.SMTP_PASS ?? '',
+    from: process.env.MAIL_FROM ?? 'NOVA <no-reply@nova-bienetre.fr>',
+  },
 };
 
 export const isProd = env.nodeEnv === 'production';

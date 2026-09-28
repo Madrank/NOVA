@@ -1,6 +1,8 @@
 import { ArrowLeft, BadgeCheck, Check, ChevronRight, Clock3, Gift, MapPin, Sparkles, Star, Users } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
+import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
+import { loadStripe } from '@stripe/stripe-js'
 import { useAuth } from '@/auth/useAuth'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
@@ -11,7 +13,7 @@ import { getCategory, getEstablishment, services as mockServices } from '@/data/
 import { placeholder } from '@/lib/placeholder'
 import { bookingsApi } from '@/services/bookings'
 import { servicesApi } from '@/services/services'
-import type { PublicBooking, BookingSlot } from '@/types/booking'
+import type { BookingSlot, CreateBookingResult, PublicBooking } from '@/types/booking'
 import type { PublicService } from '@/types/service'
 import { cn } from '@/lib/cn'
 
@@ -71,7 +73,7 @@ function BookingPanel({ service, returned }: BookingPanelProps) {
   const [slotsState, setSlotsState] = useState<SlotsState>({ key: '', slots: null, error: false })
   const [selectedDay, setSelectedDay] = useState('')
   const [selectedSlot, setSelectedSlot] = useState<BookingSlot | null>(null)
-  const [booking, setBooking] = useState<PublicBooking | null>(null)
+  const [created, setCreated] = useState<CreateBookingResult | null>(null)
   const [bookingError, setBookingError] = useState<string | null>(null)
   const [confirming, setConfirming] = useState(false)
   const [reload, setReload] = useState(0)
@@ -109,11 +111,11 @@ function BookingPanel({ service, returned }: BookingPanelProps) {
     setConfirming(true)
     setBookingError(null)
     try {
-      const { booking: created } = await bookingsApi.create({
+      const result = await bookingsApi.create({
         serviceSlug: service.slug,
         availabilityId: selectedSlot.id,
       })
-      setBooking(created)
+      setCreated(result)
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Réservation impossible'
       setBookingError(message)
@@ -123,28 +125,11 @@ function BookingPanel({ service, returned }: BookingPanelProps) {
     }
   }
 
-  if (booking) {
-    return (
-      <div className="rounded-card border border-noir/10 bg-white/40 p-7 lg:p-8">
-        <div className="flex items-start gap-4">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gold/15 text-gold">
-            <Check className="h-6 w-6" aria-hidden="true" />
-          </span>
-          <div>
-            <p className="font-serif text-2xl text-noir">C'est réservé.</p>
-            <p className="mt-2 text-sm leading-relaxed text-ink/70">
-              {service.name} — {dateLabel(dayKey(new Date(booking.startsAt)))} à {timeOf(booking.startsAt)}.
-              <br />
-              {formatPrice(booking.price)} · annulable depuis votre compte.
-            </p>
-            <div className="mt-5 flex flex-wrap gap-3">
-              <Button to="/compte" size="sm" variant="outline">
-                Mes réservations
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
+  if (created) {
+    return created.booking.status === 'confirmed' ? (
+      <ConfirmedCard booking={created.booking} />
+    ) : (
+      <PaymentCheckout result={created} onPaid={(booking) => setCreated({ ...created, booking })} />
     )
   }
 
@@ -232,7 +217,7 @@ function BookingPanel({ service, returned }: BookingPanelProps) {
             {confirming ? 'Réservation en cours…' : status === 'authenticated' ? 'Confirmer la réservation' : 'Se connecter pour réserver'}
           </Button>
           <p className="mt-4 text-center text-xs leading-relaxed text-ink/50">
-            Créneau confirmé instantanément. Annulation gratuite depuis votre compte.
+            Votre créneau est mis de côté, puis confirmé après paiement sécurisé. Annulation remboursée depuis votre compte.
           </p>
         </>
       )}
@@ -246,6 +231,193 @@ function isSlotConflict(err: unknown): boolean {
     err !== null &&
     'code' in err &&
     ((err as { code: string }).code === 'BOOKING_CONFLICT' || (err as { code: string }).code === 'SLOT_UNAVAILABLE')
+  )
+}
+
+function ConfirmedCard({ booking }: { booking: PublicBooking }) {
+  const paid = booking.payment?.status === 'succeeded'
+  return (
+    <div className="rounded-card border border-noir/10 bg-white/40 p-7 lg:p-8">
+      <div className="flex items-start gap-4">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gold/15 text-gold">
+          <Check className="h-6 w-6" aria-hidden="true" />
+        </span>
+        <div>
+          <p className="font-serif text-2xl text-noir">C'est réservé.</p>
+          <p className="mt-2 text-sm leading-relaxed text-ink/70">
+            {booking.service.name} — {dateLabel(dayKey(new Date(booking.startsAt)))} à {timeOf(booking.startsAt)}.
+            <br />
+            {formatPrice(booking.price)} {paid ? '· paiement confirmé' : ''} · annulable et remboursée depuis votre compte.
+          </p>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <Button to="/compte" size="sm" variant="outline">
+              Mes réservations
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function PaymentCheckout({
+  result,
+  onPaid,
+}: {
+  result: CreateBookingResult
+  onPaid: (booking: PublicBooking) => void
+}) {
+  const booking = result.booking
+  return (
+    <div className="rounded-card border border-noir/10 bg-white/40 p-7 lg:p-8">
+      <p className="text-xs uppercase tracking-[0.2em] text-ink/50">Finaliser le paiement</p>
+      <p className="mt-3 font-serif text-2xl text-noir">{booking.service.name}</p>
+      <p className="mt-1 text-sm text-ink/70">
+        {dateLabel(dayKey(new Date(booking.startsAt)))} à {timeOf(booking.startsAt)} · {booking.service.durationMinutes} min
+      </p>
+      <div className="mt-6 flex items-end justify-between border-t border-noir/10 pt-5">
+        <span className="text-xs uppercase tracking-[0.2em] text-ink/50">Total à payer</span>
+        <span className="font-serif text-3xl text-noir">{formatPrice(booking.price)}</span>
+      </div>
+      <div className="mt-6">
+        {result.payment.demo ? (
+          <DemoPay bookingId={booking.id} price={booking.price} onPaid={onPaid} />
+        ) : (
+          <StripePay result={result} onPaid={onPaid} />
+        )}
+      </div>
+      <p className="mt-4 text-center text-xs leading-relaxed text-ink/50">
+        Votre créneau est réservé le temps du paiement. S'il n'aboutit pas, il est libéré automatiquement.
+      </p>
+    </div>
+  )
+}
+
+function DemoPay({
+  bookingId,
+  price,
+  onPaid,
+}: {
+  bookingId: string
+  price: number
+  onPaid: (booking: PublicBooking) => void
+}) {
+  const [paying, setPaying] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function pay() {
+    setPaying(true)
+    setError(null)
+    try {
+      const { booking } = await bookingsApi.pay(bookingId)
+      onPaid(booking)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Paiement impossible')
+    } finally {
+      setPaying(false)
+    }
+  }
+
+  return (
+    <div>
+      <Button size="lg" className="w-full" disabled={paying} onClick={pay}>
+        {paying ? 'Paiement en cours…' : `Confirmer le paiement (${formatPrice(price)})`}
+      </Button>
+      {error ? (
+        <p className="mt-3 text-sm text-bordeaux" role="alert">
+          {error}
+        </p>
+      ) : null}
+      <p className="mt-3 text-center text-xs text-ink/50">
+        Mode démo : aucun compte Stripe n'est configuré, le paiement est simulé.
+      </p>
+    </div>
+  )
+}
+
+function StripePay({
+  result,
+  onPaid,
+}: {
+  result: CreateBookingResult
+  onPaid: (booking: PublicBooking) => void
+}) {
+  const stripePromise = useMemo(
+    () => (result.payment.publishableKey ? loadStripe(result.payment.publishableKey) : null),
+    [result.payment.publishableKey],
+  )
+  if (!stripePromise || !result.payment.clientSecret) {
+    return (
+      <p className="py-4 text-center text-sm text-ink/70">Chargement du paiement sécurisé…</p>
+    )
+  }
+  return (
+    <Elements stripe={stripePromise} options={{ clientSecret: result.payment.clientSecret }}>
+      <CheckoutForm
+        bookingId={result.booking.id}
+        clientSecret={result.payment.clientSecret}
+        onPaid={onPaid}
+      />
+    </Elements>
+  )
+}
+
+function CheckoutForm({
+  bookingId,
+  clientSecret,
+  onPaid,
+}: {
+  bookingId: string
+  clientSecret: string
+  onPaid: (booking: PublicBooking) => void
+}) {
+  const stripe = useStripe()
+  const elements = useElements()
+  const [paying, setPaying] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function submit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!stripe || !elements) return
+    setPaying(true)
+    setError(null)
+    const { error: confirmError } = await stripe.confirmPayment({
+      elements,
+      confirmParams: { return_url: window.location.href },
+      redirect: 'if_required',
+    })
+    if (confirmError) {
+      setError(confirmError.message ?? 'Paiement refusé')
+      setPaying(false)
+      return
+    }
+    try {
+      const { booking } = await bookingsApi.pay(bookingId)
+      onPaid(booking)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Confirmation de paiement impossible')
+    } finally {
+      setPaying(false)
+    }
+  }
+
+  return (
+    <form onSubmit={submit}>
+      <div className="rounded-card border border-noir/10 bg-ivory/60 p-4">
+        <PaymentElement />
+      </div>
+      <Button size="lg" className="mt-4 w-full" disabled={!stripe || paying} type="submit">
+        {paying ? 'Paiement en cours…' : 'Payer maintenant'}
+      </Button>
+      {error ? (
+        <p className="mt-3 text-sm text-bordeaux" role="alert">
+          {error}
+        </p>
+      ) : null}
+      <p className="mt-3 text-center text-xs text-ink/50">
+        Paiement sécurisé via Stripe ({clientSecret.slice(0, 8)}…).
+      </p>
+    </form>
   )
 }
 
@@ -340,6 +512,7 @@ function ComposedServiceView({ slug, mockOnly, apiService }: ComposedServiceView
   const giftable = apiService?.giftable ?? service?.giftable ?? false
   const imageFrom = apiService?.imageFrom ?? service?.imageFrom ?? '#2a2018'
   const imageTo = apiService?.imageTo ?? service?.imageTo ?? '#5e1f2a'
+  const image = apiService?.image ?? service?.image
 
   const related = mockServices
     .filter((item) => item.category === (service?.category ?? ''))
@@ -367,7 +540,7 @@ function ComposedServiceView({ slug, mockOnly, apiService }: ComposedServiceView
           <div className="lg:col-span-7">
             <Reveal>
               <img
-                src={placeholder({
+                src={image ?? placeholder({
                   from: imageFrom,
                   to: imageTo,
                   label: category?.name ?? 'NOVA',
@@ -436,8 +609,8 @@ function ComposedServiceView({ slug, mockOnly, apiService }: ComposedServiceView
                 <h2 className="font-serif text-2xl text-noir">Bon à savoir</h2>
                 <ul className="mt-5 grid gap-3 sm:grid-cols-2">
                   {[
-                    'Créneau confirmé en temps réel, sans conflit possible',
-                    'Annulation gratuite depuis votre compte',
+                    'Paiement sécurisé en ligne, réservation confirmée',
+                    'Annulation remboursée depuis votre compte',
                     'Serviettes et infusion comprises',
                     'Accessible dès une première réservation',
                   ].map((item) => (

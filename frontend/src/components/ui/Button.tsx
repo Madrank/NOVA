@@ -1,6 +1,7 @@
 import type { AnchorHTMLAttributes, ButtonHTMLAttributes } from 'react'
 import { Link } from 'react-router-dom'
 import { cn } from '@/lib/cn'
+import { HashLink } from '@/components/ui/HashLink'
 
 type Variant = 'primary' | 'light' | 'outline' | 'ghost' | 'bordeaux'
 type Size = 'sm' | 'md' | 'lg'
@@ -33,6 +34,7 @@ type ButtonLinkProps = ButtonBaseProps &
   Omit<AnchorHTMLAttributes<HTMLAnchorElement>, keyof ButtonBaseProps> & {
     href?: string
     to?: string
+    hash?: string
   }
 
 type ButtonProps = ButtonLinkProps | (ButtonBaseProps & Omit<ButtonHTMLAttributes<HTMLButtonElement>, keyof ButtonBaseProps>)
@@ -41,9 +43,14 @@ export function Button({ className, variant = 'primary', size = 'md', ...props }
   const classes = cn(baseClasses, variantClasses[variant], sizeClasses[size], className)
   const to = (props as Partial<ButtonLinkProps>).to
   const href = (props as Partial<ButtonLinkProps>).href
+  const hash = (props as Partial<ButtonLinkProps>).hash
 
   if (to) {
     return <Link className={classes} to={to} {...(props as AnchorHTMLAttributes<HTMLAnchorElement>)} />
+  }
+
+  if (hash) {
+    return <HashLink hash={hash} className={classes} {...(props as AnchorHTMLAttributes<HTMLAnchorElement>)} />
   }
 
   if (href) {

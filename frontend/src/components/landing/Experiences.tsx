@@ -3,37 +3,36 @@ import { Container } from '@/components/ui/Container'
 import { Reveal } from '@/components/ui/Reveal'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { cn } from '@/lib/cn'
-import { placeholder, visual } from '@/lib/placeholder'
 
 const categories = [
   {
     name: 'Massage',
     note: 'Rituels & pierres',
-    src: placeholder(visual.massage),
+    src: '/images/massage.jpg',
     className: 'lg:col-span-7',
   },
   {
     name: 'Spa',
     note: 'Thermal & sauna',
-    src: placeholder(visual.spa),
+    src: '/images/sauna.jpg',
     className: 'lg:col-span-5',
   },
   {
     name: 'Beauté',
     note: 'Soins du visage',
-    src: placeholder(visual.beaute),
+    src: '/images/beaute.jpg',
     className: 'lg:col-span-5',
   },
   {
     name: 'Yoga',
     note: 'Méditation',
-    src: placeholder(visual.yoga),
+    src: '/images/yoga.jpg',
     className: 'lg:col-span-4',
   },
   {
     name: 'Bien-être',
     note: 'Équilibre',
-    src: placeholder(visual.bienetre),
+    src: '/images/meditation.jpg',
     className: 'lg:col-span-3',
   },
 ]

@@ -12,7 +12,7 @@ export function EstablishmentCard({ establishment }: { establishment: PublicEsta
       <Link to={`/etablissement/${slug}`} className="block">
         <div className="aspect-[16/10] overflow-hidden">
           <img
-            src={placeholder({
+            src={establishment.image ?? placeholder({
               from: '#24201c',
               to: '#b98a3e',
               label: name,

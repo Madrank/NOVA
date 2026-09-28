@@ -11,6 +11,7 @@ import {
   createMyAvailabilityController,
   deleteMyAvailabilityController,
   myAppointmentsController,
+  myDashboardController,
 } from '../controllers/availability.js';
 import { validateBody } from '../middlewares/validate.js';
 import { requireAuth, requireRole } from '../middlewares/auth.js';
@@ -26,5 +27,6 @@ professionalRouter.get('/me/availability', requireAuth, requireRole('professiona
 professionalRouter.post('/me/availability', requireAuth, requireRole('professional'), validateBody(createAvailabilitySchema), createMyAvailabilityController);
 professionalRouter.delete('/me/availability/:slotId', requireAuth, requireRole('professional'), deleteMyAvailabilityController);
 professionalRouter.get('/me/appointments', requireAuth, requireRole('professional'), myAppointmentsController);
+professionalRouter.get('/me/dashboard', requireAuth, requireRole('professional'), myDashboardController);
 professionalRouter.get('/', listProfessionalsController);
 professionalRouter.get('/:slug', professionalDetailController);

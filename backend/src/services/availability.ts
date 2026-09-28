@@ -7,10 +7,13 @@ import {
   listMySlots,
 } from '../repositories/availability.js';
 import { listProfessionalAppointments } from '../repositories/bookings.js';
+import { paymentConfig } from '../lib/stripe.js';
 import { AppError, ConflictError, NotFoundError } from '../lib/errors.js';
 import type { PublicManageSlot } from '../types/availability.js';
 import type { PublicProfessionalBooking } from '../types/booking.js';
 import { toPublicManageSlot } from '../types/availability.js';
+
+import { purgeExpiredHoldsAndNotify } from './notifications.js';
 
 const DAY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const MAX_DAYS_AHEAD = 60;
@@ -53,6 +56,7 @@ function shiftDateKey(key: string, days: number): string {
 
 export async function listMyAvailability(userId: string): Promise<{ slots: PublicManageSlot[] }> {
   const professional = await requireProfessional(userId);
+  await purgeExpiredHoldsAndNotify(paymentConfig().holdMinutes);
   const rows = await listMySlots(professional.id);
   return { slots: rows.map(toPublicManageSlot) };
 }

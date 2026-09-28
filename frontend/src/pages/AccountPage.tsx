@@ -6,8 +6,8 @@ import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Container } from '@/components/ui/Container'
 import { placeholder } from '@/lib/placeholder'
-import { bookingsApi } from '@/services/bookings'
-import type { PublicBooking } from '@/types/booking'
+import { bookingsApi, paymentsApi } from '@/services/bookings'
+import type { PaymentConfig, PublicBooking } from '@/types/booking'
 import { cn } from '@/lib/cn'
 
 function formatPrice(value: number): string {
@@ -21,6 +21,7 @@ interface BookingsState {
 }
 
 const STATUS_LABELS: Record<PublicBooking['status'], { label: string; tone: 'outline' | 'gold' | 'bordeaux' }> = {
+  pending: { label: 'Paiement en attente', tone: 'outline' },
   confirmed: { label: 'Confirmée', tone: 'gold' },
   cancelled: { label: 'Annulée', tone: 'bordeaux' },
   completed: { label: 'Terminée', tone: 'outline' },
@@ -30,8 +31,17 @@ export function AccountPage() {
   const { user, logout } = useAuth()
   const [bookingsState, setBookingsState] = useState<BookingsState>({ key: '', bookings: null, error: false })
   const [cancellingId, setCancellingId] = useState<string | null>(null)
+  const [payingId, setPayingId] = useState<string | null>(null)
   const [cancelError, setCancelError] = useState<string | null>(null)
+  const [payConfig, setPayConfig] = useState<PaymentConfig | null>(null)
   const [reload, setReload] = useState(0)
+
+  useEffect(() => {
+    paymentsApi
+      .config()
+      .then(({ config }) => setPayConfig(config))
+      .catch(() => undefined)
+  }, [])
 
   const key = user ? `me:${user.id}:${reload}` : ''
   const isPending = bookingsState.key !== key
@@ -74,8 +84,21 @@ export function AccountPage() {
     }
   }
 
+  async function payBooking(id: string) {
+    setPayingId(id)
+    setCancelError(null)
+    try {
+      await bookingsApi.pay(id)
+      setReload((value) => value + 1)
+    } catch (err) {
+      setCancelError(err instanceof Error ? err.message : 'Paiement impossible.')
+    } finally {
+      setPayingId(null)
+    }
+  }
+
   const bookings = bookingsState.bookings ?? []
-  const upcoming = bookings.filter((item) => item.status === 'confirmed')
+  const upcoming = bookings.filter((item) => item.status === 'confirmed' || item.status === 'pending')
   const past = bookings.filter((item) => item.status === 'cancelled' || item.status === 'completed')
 
   return (
@@ -175,8 +198,10 @@ export function AccountPage() {
           isPending={isPending}
           bookings={upcoming}
           cancellingId={cancellingId}
+          payingId={payingId}
           cancelError={cancelError}
           onCancel={cancelBooking}
+          onPay={payConfig?.demo ? payBooking : undefined}
         />
 
         {past.length > 0 ? (
@@ -208,8 +233,10 @@ interface BookingsSectionProps {
   isPending: boolean
   bookings: PublicBooking[]
   cancellingId: string | null
+  payingId?: string | null
   cancelError: string | null
   onCancel?: (id: string) => void
+  onPay?: (id: string) => void
   archive?: boolean
 }
 
@@ -223,8 +250,10 @@ function BookingsSection({
   isPending,
   bookings,
   cancellingId,
+  payingId = null,
   cancelError,
   onCancel,
+  onPay,
   archive = false,
 }: BookingsSectionProps) {
   return (
@@ -260,8 +289,10 @@ function BookingsSection({
               key={booking.id}
               booking={booking}
               cancelling={cancellingId === booking.id}
-              disabled={cancellingId !== null}
+              paying={payingId === booking.id}
+              disabled={cancellingId !== null || payingId !== null}
               onCancel={onCancel ? () => onCancel(booking.id) : undefined}
+              onPay={onPay && booking.status === 'pending' ? () => onPay(booking.id) : undefined}
             />
           ))}
         </ul>
@@ -279,17 +310,19 @@ function BookingsSection({
 interface BookingCardProps {
   booking: PublicBooking
   cancelling: boolean
+  paying: boolean
   disabled: boolean
   onCancel?: () => void
+  onPay?: () => void
 }
 
-function BookingCard({ booking, cancelling, disabled, onCancel }: BookingCardProps) {
+function BookingCard({ booking, cancelling, paying, disabled, onCancel, onPay }: BookingCardProps) {
   const statusMeta = STATUS_LABELS[booking.status]
   const city = booking.establishment?.city ?? ''
   return (
     <li className="flex flex-col gap-5 rounded-card border border-noir/10 bg-white/40 p-5 sm:flex-row sm:items-center">
       <img
-        src={placeholder({
+        src={booking.service.image ?? placeholder({
           from: booking.service.imageFrom ?? '#2a2018',
           to: booking.service.imageTo ?? '#5e1f2a',
           label: booking.service.name,
@@ -324,15 +357,35 @@ function BookingCard({ booking, cancelling, disabled, onCancel }: BookingCardPro
         </p>
       </div>
       {onCancel ? (
-        <Button
-          size="sm"
-          variant="outline"
-          disabled={disabled || cancelling}
-          onClick={onCancel}
-          className="shrink-0 justify-self-start text-bordeaux hover:border-bordeaux hover:text-bordeaux sm:justify-self-end"
-        >
-          {cancelling ? 'Annulation…' : 'Annuler'}
-        </Button>
+        <div className="flex shrink-0 items-center gap-3 sm:justify-end">
+          {booking.status === 'pending' ? (
+            <>
+              {onPay ? (
+                <Button
+                  size="sm"
+                  disabled={disabled || paying}
+                  onClick={onPay}
+                  className="bg-gold text-noir hover:bg-gold-light"
+                >
+                  {paying ? 'Paiement…' : `Payer ${formatPrice(booking.price)}`}
+                </Button>
+              ) : (
+                <p className="max-w-xs text-xs leading-relaxed text-ink/50">
+                  Paiement à finaliser sur la page de l'expérience.
+                </p>
+              )}
+            </>
+          ) : null}
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={disabled || cancelling}
+            onClick={onCancel}
+            className="justify-self-start text-bordeaux hover:border-bordeaux hover:text-bordeaux sm:justify-self-end"
+          >
+            {cancelling ? 'Annulation…' : 'Annuler'}
+          </Button>
+        </div>
       ) : null}
     </li>
   )

@@ -13,6 +13,7 @@ export interface ServiceRow {
   giftable: boolean;
   rating: string;
   reviews_count: number;
+  image_path: string | null;
   image_from: string | null;
   image_to: string | null;
   professional_id: string | null;
@@ -35,6 +36,7 @@ export interface PublicService {
   giftable: boolean;
   rating: number;
   reviewsCount: number;
+  image: string | null;
   imageFrom: string | null;
   imageTo: string | null;
   establishment: PublicEstablishmentSummary | null;
@@ -60,6 +62,7 @@ export function toPublicService(row: ServiceRow & ServiceNames): PublicService {
     giftable: row.giftable,
     rating: Number(row.rating),
     reviewsCount: row.reviews_count,
+    image: row.image_path,
     imageFrom: row.image_from,
     imageTo: row.image_to,
     establishment: row.establishment_id

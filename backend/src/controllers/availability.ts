@@ -1,5 +1,6 @@
 import type { Response } from 'express';
 import * as availabilityService from '../services/availability.js';
+import * as dashboardService from '../services/dashboard.js';
 import type { AuthRequest } from '../middlewares/auth.js';
 
 export async function myAvailabilityController(req: AuthRequest, res: Response): Promise<void> {
@@ -19,5 +20,10 @@ export async function deleteMyAvailabilityController(req: AuthRequest, res: Resp
 
 export async function myAppointmentsController(req: AuthRequest, res: Response): Promise<void> {
   const result = await availabilityService.listMyAppointments(req.auth!.userId);
+  res.json(result);
+}
+
+export async function myDashboardController(req: AuthRequest, res: Response): Promise<void> {
+  const result = await dashboardService.getProDashboard(req.auth!.userId);
   res.json(result);
 }

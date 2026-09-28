@@ -80,7 +80,7 @@ export function ProfessionalDetailPage() {
           <div className="lg:col-span-7">
             <Reveal>
               <img
-                src={placeholder({
+                src={professional.photo ?? placeholder({
                   from: '#2b2420',
                   to: '#5e1f2a',
                   label: `${firstName[0]}${lastName[0]}`,

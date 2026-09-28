@@ -3,7 +3,6 @@ import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Container } from '@/components/ui/Container'
 import { Reveal } from '@/components/ui/Reveal'
-import { placeholder, visual } from '@/lib/placeholder'
 
 const signatureItems = [
   {
@@ -21,7 +20,7 @@ const signatureItems = [
 ]
 
 export function Showcase() {
-  const media = placeholder(visual.signature)
+  const media = '/images/duo.jpg'
 
   return (
     <section id="signature" className="scroll-mt-24 bg-ivory-deep py-24 lg:py-36">

@@ -1,6 +1,19 @@
-export const BOOKING_STATUSES = ['confirmed', 'cancelled', 'completed'] as const;
+export const BOOKING_STATUSES = ['pending', 'confirmed', 'cancelled', 'completed'] as const;
 
 export type BookingStatus = (typeof BOOKING_STATUSES)[number];
+
+export const PAYMENT_STATUSES = ['pending', 'succeeded', 'failed', 'refunded'] as const;
+
+export type PaymentStatus = (typeof PAYMENT_STATUSES)[number];
+
+export interface PublicPaymentInfo {
+  status: PaymentStatus;
+  amount: number;
+}
+
+export interface PublicBookingWithPayment extends PublicBooking {
+  payment: PublicPaymentInfo | null;
+}
 
 export interface AvailabilitySlotRow {
   id: string;
@@ -35,6 +48,7 @@ export interface BookingRow {
 
 export interface PublicBooking {
   id: string;
+  clientId: string;
   status: BookingStatus;
   startsAt: string;
   endsAt: string;
@@ -46,6 +60,7 @@ export interface PublicBooking {
     name: string;
     category: string;
     durationMinutes: number;
+    image: string | null;
     imageFrom: string | null;
     imageTo: string | null;
   };
@@ -55,6 +70,7 @@ export interface PublicBooking {
     city: string;
   } | null;
   professional: {
+    id: string;
     slug: string;
     firstName: string;
     lastName: string;
@@ -68,6 +84,7 @@ export function toPublicSlot(row: AvailabilitySlotRow): PublicBookingSlot {
 export function toPublicBooking(row: BookingRow & BookingNames): PublicBooking {
   return {
     id: row.id,
+    clientId: row.client_id,
     status: row.status,
     startsAt: row.starts_at.toISOString(),
     endsAt: row.ends_at.toISOString(),
@@ -79,6 +96,7 @@ export function toPublicBooking(row: BookingRow & BookingNames): PublicBooking {
       name: row.service_name,
       category: row.service_category,
       durationMinutes: row.service_duration_min,
+      image: row.service_image_path,
       imageFrom: row.service_image_from,
       imageTo: row.service_image_to,
     },
@@ -86,6 +104,7 @@ export function toPublicBooking(row: BookingRow & BookingNames): PublicBooking {
       ? { slug: row.establishment_slug, name: row.establishment_name, city: row.establishment_city }
       : null,
     professional: {
+      id: row.professional_id,
       slug: row.professional_slug,
       firstName: row.professional_first_name,
       lastName: row.professional_last_name,
@@ -109,11 +128,21 @@ export function toProfessionalBooking(row: BookingRow & BookingNames & Professio
   };
 }
 
+export function toPublicBookingWithPayment(row: BookingRow & BookingNames): PublicBookingWithPayment {
+  return {
+    ...toPublicBooking(row),
+    payment: row.payment_status
+      ? { status: row.payment_status, amount: row.payment_amount ?? 0 }
+      : null,
+  };
+}
+
 export interface BookingNames {
   service_slug: string;
   service_name: string;
   service_category: string;
   service_duration_min: number;
+  service_image_path: string | null;
   service_image_from: string | null;
   service_image_to: string | null;
   establishment_id: string | null;
@@ -123,4 +152,6 @@ export interface BookingNames {
   professional_slug: string;
   professional_first_name: string;
   professional_last_name: string;
+  payment_status: PaymentStatus | null;
+  payment_amount: number | null;
 }

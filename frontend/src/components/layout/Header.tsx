@@ -4,19 +4,21 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/auth/useAuth'
 import { Button } from '@/components/ui/Button'
+import { HashLink } from '@/components/ui/HashLink'
+import { NotificationBell } from '@/components/notifications/NotificationBell'
 import { cn } from '@/lib/cn'
 
 interface NavLink {
   label: string
-  href?: string
+  hash?: string
   to?: string
 }
 
 const navLinks: NavLink[] = [
-  { label: 'Découvrir', href: '#categories' },
+  { label: 'Découvrir', hash: 'categories' },
   { label: 'Expériences', to: '/experiences' },
-  { label: 'Professionnels', href: '#professionnels' },
-  { label: 'À propos', href: '#concept' },
+  { label: 'Professionnels', hash: 'professionnels' },
+  { label: 'À propos', hash: 'concept' },
 ]
 
 function SessionActions({
@@ -34,8 +36,9 @@ function SessionActions({
     const initials = `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
     return (
       <div className={cn('flex items-center gap-3', compact && 'flex-col items-stretch gap-3')}>
+        <NotificationBell key={status} solid={solid} onNavigate={onNavigate} />
         <Link
-          to="/compte"
+          to={user.role === 'professional' ? '/tableau-de-bord' : user.role === 'admin' ? '/admin' : '/compte'}
           onClick={onNavigate}
           className={cn(
             'inline-flex items-center gap-2 rounded-btn px-2 py-1.5 text-[0.75rem] font-medium uppercase tracking-[0.18em] transition-colors duration-300',
@@ -51,7 +54,7 @@ function SessionActions({
           >
             {initials}
           </span>
-          Mon compte
+          {user.role === 'professional' ? 'Tableau de bord' : user.role === 'admin' ? 'Back-office' : 'Mon compte'}
         </Link>
         <Button
           onClick={() => {
@@ -124,8 +127,8 @@ export function Header() {
       className="fixed inset-x-0 top-0 z-50 backdrop-blur-md"
     >
       <nav aria-label="Navigation principale" className="flex items-center justify-between px-5 py-5 sm:px-8 lg:px-12">
-        <a
-          href="#top"
+        <HashLink
+          hash="top"
           className={cn(
             'font-serif text-2xl tracking-[0.3em] transition-colors duration-300',
             solid ? 'text-noir' : 'text-ivory',
@@ -133,7 +136,7 @@ export function Header() {
           aria-label="NOVA — retour en haut de page"
         >
           NOVA
-        </a>
+        </HashLink>
 
         <ul className="hidden items-center gap-9 lg:flex">
           {navLinks.map((link) => (
@@ -148,17 +151,17 @@ export function Header() {
                 >
                   {link.label}
                 </Link>
-              ) : (
-                <a
-                  href={link.href}
+              ) : link.hash ? (
+                <HashLink
+                  hash={link.hash}
                   className={cn(
                     'text-[0.75rem] font-medium uppercase tracking-[0.22em] transition-colors duration-300',
                     solid ? 'text-ink/80 hover:text-gold' : 'text-ivory/85 hover:text-gold-light',
                   )}
                 >
                   {link.label}
-                </a>
-              )}
+                </HashLink>
+              ) : null}
             </li>
           ))}
         </ul>
@@ -209,15 +212,15 @@ export function Header() {
                     >
                       {link.label}
                     </Link>
-                  ) : (
-                    <a
-                      href={link.href}
+                  ) : link.hash ? (
+                    <HashLink
+                      hash={link.hash}
                       onClick={() => setMenuOpen(false)}
                       className="font-serif text-4xl text-ivory transition-colors hover:text-gold-light"
                     >
                       {link.label}
-                    </a>
-                  )}
+                    </HashLink>
+                  ) : null}
                 </motion.li>
               ))}
             </ul>

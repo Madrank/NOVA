@@ -22,6 +22,7 @@ interface ApiRequestOptions {
   method?: string
   body?: unknown
   token?: string | null
+  query?: Record<string, string | undefined>
 }
 
 interface ApiErrorBody {
@@ -32,7 +33,12 @@ interface ApiErrorBody {
 }
 
 export async function apiRequest<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
-  const response = await fetch(`/api${path}`, {
+  const search = options.query
+    ? `?${new URLSearchParams(
+        Object.entries(options.query).filter((entry): entry is [string, string] => entry[1] !== undefined),
+      ).toString()}`
+    : ''
+  const response = await fetch(`/api${path}${search}`, {
     method: options.method ?? 'GET',
     headers: jsonHeaders(options.token),
     body: options.body === undefined ? undefined : JSON.stringify(options.body),

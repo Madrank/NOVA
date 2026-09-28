@@ -29,7 +29,7 @@ export function ServiceCard({ service }: ServiceCardProps) {
         className="relative block aspect-[4/3] overflow-hidden"
       >
         <img
-          src={placeholder({
+          src={service.image ?? placeholder({
             from: service.imageFrom,
             to: service.imageTo,
             label: category?.name ?? 'NOVA',

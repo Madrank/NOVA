@@ -12,7 +12,7 @@ export function ProfessionalCard({ professional }: { professional: PublicProfess
       <Link to={`/professionnel/${professional.slug}`} className="block">
         <div className="aspect-[16/10] overflow-hidden">
           <img
-            src={placeholder({
+            src={professional.photo ?? placeholder({
               from: '#2b2420',
               to: '#5e1f2a',
               label: `${firstName[0]}${lastName[0]}`,

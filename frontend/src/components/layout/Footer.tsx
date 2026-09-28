@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { categories } from '@/data/services'
 import { Container } from '@/components/ui/Container'
+import { HashLink } from '@/components/ui/HashLink'
 
 const explore = [
   ...categories.map((category) => ({
@@ -17,9 +18,9 @@ const network = [
 ]
 
 const company = [
-  { label: 'À propos', href: '#concept' },
-  { label: 'Devenir partenaire', href: '#professionnels' },
-  { label: 'Contact', href: '#connection' },
+  { label: 'À propos', hash: 'concept' },
+  { label: 'Devenir partenaire', hash: 'professionnels' },
+  { label: 'Réserver une expérience', hash: 'reserver' },
 ]
 
 const socials = [
@@ -119,12 +120,12 @@ export function Footer() {
             <ul className="mt-5 space-y-3">
               {company.map((item) => (
                 <li key={item.label}>
-                  <a
-                    href={item.href}
+                  <HashLink
+                    hash={item.hash}
                     className="text-sm text-ivory/70 transition-colors duration-300 hover:text-gold-light"
                   >
                     {item.label}
-                  </a>
+                  </HashLink>
                 </li>
               ))}
             </ul>

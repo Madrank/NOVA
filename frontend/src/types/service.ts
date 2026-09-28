@@ -28,6 +28,7 @@ export interface Service {
   reviewsCount: number
   duo: boolean
   giftable: boolean
+  image: string
   imageFrom: string
   imageTo: string
 }
@@ -62,6 +63,7 @@ export interface PublicService {
   giftable: boolean
   rating: number
   reviewsCount: number
+  image: string | null
   imageFrom: string | null
   imageTo: string | null
   establishment: {

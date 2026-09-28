@@ -17,7 +17,7 @@ nova/
 │       ├── data/           # Données mock (catalogue Phase 4, en attente d'API)
 │       └── main.tsx
 ├── backend/
-│   ├── db/init/               # 001_auth.sql, 002_professionals_establishments.sql (création du volume)
+│   ├── db/init/               # 001_auth.sql … 005_payments.sql (création du volume)
 │   ├── .env.example           # Variables d'environnement (copier vers .env)
 │   └── src/
 │       ├── controllers/       # HTTP : valider l'entrée, appeler le service, répondre
@@ -59,13 +59,27 @@ nova/
 | `GET` | `/api/services` | public | Catalogue des prestations (12 seedées) |
 | `GET` | `/api/services/:slug` | public | Fiche d'une prestation (établissement + pro inclus) |
 | `GET` | `/api/services/:slug/availability` | public | Créneaux libres (15 prochains jours) |
-| `POST` | `/api/bookings` | client | Création d'une réservation (slots `confirmed` sans overlap) |
-| `GET` | `/api/bookings/me` | client | Réservations du client connecté |
-| `POST` | `/api/bookings/:id/cancel` | client/pro/admin | Annulation (raison optionnelle, slot libéré) |
+| `POST` | `/api/bookings` | client | Création d'une réservation `pending` (créneau verrouillé, paiement requis) |
+| `GET` | `/api/bookings/me` | client | Réservations du client connecté (statut de paiement inclus) |
+| `POST` | `/api/bookings/:id/pay` | client/pro/admin | Confirmation du paiement (démo ou Stripe), passage à `confirmed` |
+| `POST` | `/api/bookings/:id/cancel` | client/pro/admin | Annulation (raison optionnelle, slot libéré, remboursement auto si payé) |
 | `GET` | `/api/professionals/me/availability` | pro | Créneaux à venir du pro (prestations incluses) |
 | `POST` | `/api/professionals/me/availability` | pro | Génération de créneaux (jours + plages, pas = durée de prestation) |
 | `DELETE` | `/api/professionals/me/availability/:slotId` | pro | Suppression d'un créneau libre (refus 409 si réservé) |
 | `GET` | `/api/professionals/me/appointments` | pro | Réservations confirmées à venir (client inclus) |
+| `GET` | `/api/professionals/me/dashboard` | pro | Données du tableau de bord (stats, prochain RDV, agenda) |
+| `GET` | `/api/payments/config` | public | Configuration paiement (`demo`, `publishableKey`, `currency`, `holdMinutes`) |
+| `POST` | `/api/webhooks/stripe` | public | Webhook Stripe (corps brut, signature vérifiée via `STRIPE_WEBHOOK_SECRET`) |
+| `GET` | `/api/notifications` | authentifié | Notifications in-app (20 par défaut, `?limit=`) + `unreadCount` |
+| `GET` | `/api/notifications/unread-count` | authentifié | Nombre de notifications non lues (léger, pour le badge) |
+| `POST` | `/api/notifications/:id/read` | authentifié | Marquage d'une notification comme lue |
+| `POST` | `/api/notifications/read-all` | authentifié | Marquage de toutes les notifications comme lues |
+| `GET` | `/api/admin/overview` | admin | Vue d'ensemble (compteurs utilisateurs/réservations/CA/contenu + dernières réservations) |
+| `GET` | `/api/admin/users` | admin | Liste des utilisateurs (`?role=`, `?q=`) |
+| `PATCH` | `/api/admin/users/:id/role` | admin | Changement de rôle (client ↔ pro, admins protégés) |
+| `GET` | `/api/admin/bookings` | admin | Liste des réservations (`?status=`) |
+| `GET` | `/api/admin/services` | admin | Liste des services (pro + établissement inclus) |
+| `PATCH` | `/api/admin/services/:id/active` | admin | Publication / dépublication d'un service |
 
 ## Principes directeurs
 
@@ -74,6 +88,11 @@ nova/
 3. **Authentification et rôles.** JWT. Profils `client`, `professional`, `admin`, chacun avec ses périmètres.
 4. **Réservations sans conflit.** Contrainte d'exclusion côté base de données + vérification dans le service de réservation.
 5. **Données sensibles.** Jamais de mot de passe en clair, jamais de données bancaires stockées (Stripe).
+
+## Tests
+
+- **Backend** (`npm test` — Vitest + supertest) : tests unitaires (mail, validators, garanties du service admin via mocks) et tests d'intégration des routes API contre la base de développement (inscription/connexion, catalogue, création de créneau, réservation → paiement démo → confirmation → annulation → notifications, dashboard pro, back-office admin et ses gardes). Les créneaux de test sont posés à des horaires libres de tout chevauchement (13h local). `fileParallelism: false` pour préserver l'état partagé. Les fichiers `*.test.ts` ne sont pas embarqués dans `dist` (exclus par `tsconfig.json`).
+- **Frontend** (`npm test` — Vitest + Testing Library, environnement jsdom) : logique de recherche du catalogue (`searchServices`, filtres/tri/accentuation), navigation par ancres (`HashLink`), variantes de rendu (`Button`). Nettoyage automatique entre les tests dans `src/test/setup.ts`.
 
 ## Réseau de table (évolutif)
 

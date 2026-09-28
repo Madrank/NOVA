@@ -6,6 +6,8 @@ import { Footer } from '@/components/layout/Footer'
 import { Header } from '@/components/layout/Header'
 import { AccountPage } from '@/pages/AccountPage'
 import { AvailabilityPage } from '@/pages/AvailabilityPage'
+import { DashboardPage } from '@/pages/DashboardPage'
+import { AdminPage } from '@/pages/AdminPage'
 import { CatalogPage } from '@/pages/CatalogPage'
 import { EstablishmentDetailPage } from '@/pages/EstablishmentDetailPage'
 import { EstablishmentsPage } from '@/pages/EstablishmentsPage'
@@ -19,15 +21,26 @@ import { RegisterPage } from '@/pages/RegisterPage'
 import { ServiceDetailPage } from '@/pages/ServiceDetailPage'
 
 function ScrollToTop() {
-  const { pathname, search } = useLocation()
+  const { pathname, search, hash } = useLocation()
 
   useEffect(() => {
     const html = document.documentElement
     const previous = html.style.scrollBehavior
     html.style.scrollBehavior = 'auto'
+    if (hash) {
+      const id = hash.slice(1)
+      const timer = window.setTimeout(() => {
+        document.getElementById(id)?.scrollIntoView()
+      }, 80)
+      html.style.scrollBehavior = previous
+      return () => {
+        window.clearTimeout(timer)
+        html.style.scrollBehavior = previous
+      }
+    }
     window.scrollTo(0, 0)
     html.style.scrollBehavior = previous
-  }, [pathname, search])
+  }, [pathname, search, hash])
 
   return null
 }
@@ -75,6 +88,22 @@ function App() {
             element={
               <RequireRole roles={['professional']}>
                 <AvailabilityPage />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="/tableau-de-bord"
+            element={
+              <RequireRole roles={['professional']}>
+                <DashboardPage />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <RequireRole roles={['admin']}>
+                <AdminPage />
               </RequireRole>
             }
           />
