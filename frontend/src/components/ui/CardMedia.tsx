@@ -11,6 +11,8 @@ export function CardMedia({ className, aspect = 'aspect-[4/3]', alt = '', ...pro
       <img
         className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
         alt={alt}
+        loading="lazy"
+        decoding="async"
         {...props}
       />
     </div>

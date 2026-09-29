@@ -1,5 +1,5 @@
 import { app } from './app.js';
-import { env } from './config/env.js';
+import { env, isProd } from './config/env.js';
 import { checkDatabase, pool } from './db/pool.js';
 import { runBookingReminders } from './services/notifications.js';
 
@@ -15,6 +15,12 @@ function scheduleReminders(): void {
 }
 
 async function start(): Promise<void> {
+  if (isProd) {
+    const weakJwt = env.jwtSecret.length < 32 || env.jwtSecret.startsWith('change-me');
+    if (weakJwt) {
+      throw new Error('JWT_SECRET est trop faible pour la production (≥ 32 caractères aléatoires requis).');
+    }
+  }
   await checkDatabase();
   console.log(`[db] PostgreSQL accessible`);
   app.listen(env.port, () => {

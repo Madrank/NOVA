@@ -86,6 +86,9 @@ export function EstablishmentDetailPage() {
                   noteColor: '#d4af6a',
                 })}
                 alt={establishment.name}
+                loading="eager"
+                decoding="async"
+                fetchPriority="high"
                 className="aspect-[16/10] w-full rounded-card object-cover"
               />
             </Reveal>

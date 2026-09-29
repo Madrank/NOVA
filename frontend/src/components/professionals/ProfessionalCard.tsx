@@ -21,6 +21,8 @@ export function ProfessionalCard({ professional }: { professional: PublicProfess
               noteColor: '#d4af6a',
             })}
             alt={`${firstName} ${lastName} — ${title}`}
+            loading="lazy"
+            decoding="async"
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
           />
         </div>

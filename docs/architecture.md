@@ -94,6 +94,21 @@ nova/
 - **Backend** (`npm test` — Vitest + supertest) : tests unitaires (mail, validators, garanties du service admin via mocks) et tests d'intégration des routes API contre la base de développement (inscription/connexion, catalogue, création de créneau, réservation → paiement démo → confirmation → annulation → notifications, dashboard pro, back-office admin et ses gardes). Les créneaux de test sont posés à des horaires libres de tout chevauchement (13h local). `fileParallelism: false` pour préserver l'état partagé. Les fichiers `*.test.ts` ne sont pas embarqués dans `dist` (exclus par `tsconfig.json`).
 - **Frontend** (`npm test` — Vitest + Testing Library, environnement jsdom) : logique de recherche du catalogue (`searchServices`, filtres/tri/accentuation), navigation par ancres (`HashLink`), variantes de rendu (`Button`). Nettoyage automatique entre les tests dans `src/test/setup.ts`.
 
+## Sécurité
+
+- **Headers HTTP** : `helmet` (sans CSP, appliqué au seul backend) → `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Strict-Transport-Security`, etc. `x-powered-by` désactivé.
+- **Rate limiting** (`express-rate-limit`, mémoire du processus) : limiteur général 300 req / 15 min / IP ; limiteur resserré sur `/api/auth` (30 req / 15 min, anti force-brute) ; limiteur sur `/api/bookings` et `/api/payments` (30 req / min). Webhooks Stripe exclus (IP variables, signature déjà vérifiée) — cf. `src/middlewares/rateLimit.ts`.
+- **Corps de requête** : `express.json({ limit: '64kb' })`.
+- **CORS** : origine blanche depuis `.env` (`CORS_ORIGIN`).
+- **Secrets** : `.env` hors git (placeholders dans `.env.example`) ; en production, démarrage refusé si `JWT_SECRET` < 32 caractères ou valeur par défaut (`src/server.ts`).
+
+## Performance, accessibilité, SEO
+
+- **Code splitting** : pages lourdes chargées via `React.lazy` + `Suspense` (`App.tsx`) — `AccountPage`, `DashboardPage`, `AdminPage`, `AvailabilityPage`, `ProfessionalProfilePage` (~57 Ko hors bundle principal). Landing à 500 Ko (`index-*.js`).
+- **Images** : `loading="lazy"` + `decoding="async"` par défaut (décoratives `alt=""`, titres de cartes porteurs d'aria-label) ; images LCP des pages détail en `fetchPriority="high"` (`ServiceDetailPage`, `EstablishmentDetailPage`, `ProfessionalDetailPage`).
+- **Accessibilité** : `prefers-reduced-motion` respecté en CSS global et dans `HashLink` (scroll béhavior conditionnel) ; erreurs d'administration annoncées via `role="alert"` (`PanelShell`) ; `lang="fr"`, lien d'évitement, aria-labels déjà en place.
+- **SEO** : `<head>` avec meta Open Graph/Twitter, canonical `https://nova-bienetre.fr/`, JSON-LD (`WebSite` + `Organization`) ; `public/robots.txt` et `public/sitemap.xml` (22 URLs : accueil, catalogue, pros, établissements, 12 expériences, 6 établissements).
+
 ## Réseau de table (évolutif)
 
 Créé progressivement, au rythme des fonctionnalités :

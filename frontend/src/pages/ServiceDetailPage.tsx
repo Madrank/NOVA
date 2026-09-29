@@ -549,6 +549,9 @@ function ComposedServiceView({ slug, mockOnly, apiService }: ComposedServiceView
                   noteColor: '#d4af6a',
                 })}
                 alt={`${name} — ${category?.name ?? ''} chez ${establishmentName}`}
+                loading="eager"
+                decoding="async"
+                fetchPriority="high"
                 className="aspect-[16/10] w-full rounded-card object-cover"
               />
             </Reveal>

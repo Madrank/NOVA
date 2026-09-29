@@ -17,7 +17,8 @@ export function HashLink({ hash, children, onClick, className, ...props }: HashL
     event.preventDefault()
     if (location.pathname === '/') {
       const element = document.getElementById(target.slice(1))
-      element?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
+      element?.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' })
       window.history.replaceState(null, '', target)
     } else {
       navigate(`/${target}`)

@@ -331,6 +331,8 @@ function BookingCard({ booking, cancelling, paying, disabled, onCancel, onPay }:
           noteColor: '#d4af6a',
         })}
         alt=""
+        loading="lazy"
+        decoding="async"
         className="h-24 w-full rounded-card object-cover sm:h-20 sm:w-32"
       />
       <div className="min-w-0 flex-1">

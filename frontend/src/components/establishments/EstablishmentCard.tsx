@@ -21,6 +21,8 @@ export function EstablishmentCard({ establishment }: { establishment: PublicEsta
               noteColor: '#d4af6a',
             })}
             alt={`${name} — ${address.city}`}
+            loading="lazy"
+            decoding="async"
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
           />
         </div>

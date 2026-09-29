@@ -32,7 +32,10 @@ export function PanelShell({ overline, title, loading, error, onRetry, actions, 
           Chargement…
         </p>
       ) : error ? (
-        <div className="mt-6 rounded-card border border-bordeaux/20 bg-bordeaux/5 p-8 text-center">
+        <div
+          role="alert"
+          className="mt-6 rounded-card border border-bordeaux/20 bg-bordeaux/5 p-8 text-center"
+        >
           <p className="font-serif text-2xl text-noir">Une erreur est survenue</p>
           <Button variant="bordeaux" className="mt-5" onClick={onRetry}>
             Réessayer
