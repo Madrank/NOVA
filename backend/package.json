@@ -18,7 +18,9 @@
     "db:down": "docker compose -f ../docker-compose.yml down",
     "db:logs": "docker compose -f ../docker-compose.yml logs -f db",
     "db:seed-booking": "tsx src/db/seed-booking.ts",
-    "db:seed-admin": "tsx src/db/seed-admin.ts"
+    "db:seed-admin": "tsx src/db/seed-admin.ts",
+    "db:seed-catalog": "tsx src/db/seed-catalog.ts",
+    "db:seed-demo": "tsx src/db/seed-demo.ts"
   },
   "dependencies": {
     "argon2": "^0.45.1",

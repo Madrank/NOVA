@@ -109,6 +109,13 @@ nova/
 - **Accessibilité** : `prefers-reduced-motion` respecté en CSS global et dans `HashLink` (scroll béhavior conditionnel) ; erreurs d'administration annoncées via `role="alert"` (`PanelShell`) ; `lang="fr"`, lien d'évitement, aria-labels déjà en place.
 - **SEO** : `<head>` avec meta Open Graph/Twitter, canonical `https://nova-bienetre.fr/`, JSON-LD (`WebSite` + `Organization`) ; `public/robots.txt` et `public/sitemap.xml` (22 URLs : accueil, catalogue, pros, établissements, 12 expériences, 6 établissements).
 
+## CI/CD
+
+- **GitHub Actions** (`.github/workflows/ci.yml`) déclenchée sur push et PR vers `main` / `develop` (concurrency par branche, `cancel-in-progress`).
+- **Job backend** : Postgres 16 en *service container* (base jetable `nova_ci`), schéma appliqué par `psql` sur `backend/db/init/*.sql` (`ON_ERROR_STOP=1`), puis seeds idempotents dans l'ordre : `db:seed-catalog` (6 établissements) → `db:seed-booking` (6 pros, 12 services, créneaux sur 15 jours) → `db:seed-demo` (fixtures paiement : Estelle + service *Rose de minuit*, gérées par `slug` OU `user_id`) → `db:seed-admin`. Ensuite lint (oxlint) + build (`tsc`) + `npm test` (26 tests). Les variables d'environnement `DATABASE_URL`, `JWT_SECRET` sont injectées au niveau job (pas de `.env` en CI).
+- **Job frontend** : `npm ci`, lint, 15 tests Vitest (jsdom, sans navigateur), build Vite.
+- **Reproductibilité locale** : les établissements et la fixture paiement étaient auparavant insérés à la main dans la DB de dev ; ils sont désormais scriptés (`db:seed-catalog`, `db:seed-demo`), supprimant la dérive entre machines.
+
 ## Réseau de table (évolutif)
 
 Créé progressivement, au rythme des fonctionnalités :

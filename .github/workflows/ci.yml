@@ -1,0 +1,92 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend — lint, build, tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: nova
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: nova_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U nova -d nova_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgres://nova:test@localhost:5432/nova_ci
+      JWT_SECRET: ci-only-jwt-secret-32-chars-minimum-xxxxxxxxx
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - name: Installer les dépendances
+        working-directory: backend
+        run: npm ci
+      - name: Lint
+        working-directory: backend
+        run: npm run lint
+      - name: Build TypeScript
+        working-directory: backend
+        run: npm run build
+      - name: Appliquer le schéma (SQL d'init dans l'ordre)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends postgresql-client
+          for f in backend/db/init/*.sql; do
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$f"
+          done
+      - name: Amorcer la base de test (seeds idempotents)
+        working-directory: backend
+        run: |
+          npm run db:seed-catalog
+          npm run db:seed-booking
+          npm run db:seed-demo
+          npm run db:seed-admin
+      - name: Tests (unitaires + intégration)
+        working-directory: backend
+        run: npm test
+
+  frontend:
+    name: Frontend — lint, tests, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Installer les dépendances
+        working-directory: frontend
+        run: npm ci
+      - name: Lint
+        working-directory: frontend
+        run: npm run lint
+      - name: Tests
+        working-directory: frontend
+        run: npm test
+      - name: Build de production
+        working-directory: frontend
+        run: npm run build
