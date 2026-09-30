@@ -79,6 +79,11 @@ npm run dev
 | `backend` | `npm run dev` / `build` / `start` | API Express (tsx watch, tsc, node dist) |
 | `backend` | `npm run db:up` / `db:down` / `db:logs` | Base Docker compose |
 | racine | `docker compose up -d db` | PostgreSQL 16 (port 5434) |
+| `backend` | `npm run db:seed-booking` | Pros, services et créneaux de démo |
+| `backend` | `npm run db:seed-catalog` | Les 6 établissements de la marque |
+| `backend` | `npm run db:seed-demo` | Fixture paiement (Estelle + soin visage) |
+| `backend` | `npm run db:seed-admin` | Compte administrateur de démonstration |
+| racine | `docker compose up -d db` | PostgreSQL 16 (port 5434) |
 
 Prérequis complets : Node.js ≥ 20, npm, Docker (PostgreSQL), compte Stripe.
 
